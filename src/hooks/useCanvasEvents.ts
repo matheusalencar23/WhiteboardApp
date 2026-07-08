@@ -3,19 +3,23 @@ import type { Point } from "../lib/geometry/types";
 import { Rectangle } from "../lib/geometry/rectangle";
 import { useCanvasStore } from "../store/useCanvasStore";
 import { ElementFactory } from "../lib/geometry/elementFactory";
+import { screenToWorld } from "../lib/geometry/utils";
 
 export function useCanvasEvents() {
   const initialPointDraw = useRef<Point>(null);
   const elementDrawnId = useRef<string>(null);
 
-  const { addElement, updateElement, activeTool } = useCanvasStore();
+  const { addElement, updateElement, activeTool, zoom, pan } = useCanvasStore();
 
   function handlePointerDown(event: React.PointerEvent) {
     const x = event.nativeEvent.offsetX;
     const y = event.nativeEvent.offsetY;
-    initialPointDraw.current = { x, y };
+
+    const worldPoint = screenToWorld(x, y, zoom, pan);
+    initialPointDraw.current = worldPoint;
+
     if (activeTool === "rectangle") {
-      const el = ElementFactory.create(activeTool, x, y);
+      const el = ElementFactory.create(activeTool, worldPoint.x, worldPoint.y);
       addElement(el);
       elementDrawnId.current = el.id;
     }
@@ -32,12 +36,14 @@ export function useCanvasEvents() {
     const x = event.nativeEvent.offsetX;
     const y = event.nativeEvent.offsetY;
 
+    const worldPoint = screenToWorld(x, y, zoom, pan);
+
     if (activeTool === "rectangle") {
       const id = elementDrawnId.current;
       const startX = initialPointDraw.current.x;
       const startY = initialPointDraw.current.y;
-      const width = x - initialPointDraw.current.x;
-      const height = y - initialPointDraw.current.y;
+      const width = worldPoint.x - startX;
+      const height = worldPoint.y - startY;
       const props = { id };
       const el = new Rectangle(startX, startY, width, height, props);
       updateElement(id, el);
