@@ -1,7 +1,7 @@
 import rough from "roughjs";
-import type { Element } from "./element";
+import type { IElement } from "../geometry/types";
 
-export function render(canvas: HTMLCanvasElement, elements: Element[]) {
+export function render(canvas: HTMLCanvasElement, elements: IElement[]) {
   const ctx = canvas.getContext("2d")!;
   const rc = rough.canvas(canvas);
 

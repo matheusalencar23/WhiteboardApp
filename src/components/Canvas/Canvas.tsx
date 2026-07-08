@@ -1,13 +1,15 @@
 import { useEffect, useRef } from "react";
 import "./style.css";
-import { useCanvasStore } from "../../lib/store";
-import { Rectangle } from "../../lib/element";
-import { render } from "../../lib/render";
+import { useCanvasStore } from "../../store/useCanvasStore";
+import { render } from "../../lib/canvas/engine";
+import { useCanvasEvents } from "../../hooks/useCanvasEvents";
 
 export function Canvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { elements, addElement } = useCanvasStore();
+  const { elements } = useCanvasStore();
+  const { handlePointerDown, handlePointerMove, handlePointerUp } =
+    useCanvasEvents();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -15,23 +17,15 @@ export function Canvas() {
     render(canvas, elements);
   }, [elements]);
 
-  function handlePointerUp() {
-    addElement(
-      new Rectangle(200, 300, 150, 200, {
-        stroke: "red",
-        fill: "blue",
-        fillStyle: "dashed",
-      }),
-    );
-  }
-
   return (
     <canvas
       ref={canvasRef}
       className="canvas"
       width={window.innerWidth}
       height={window.innerHeight}
+      onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
+      onPointerMove={handlePointerMove}
     />
   );
 }

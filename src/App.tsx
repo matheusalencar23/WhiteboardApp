@@ -1,6 +1,6 @@
 import "./App.css";
-import { Canvas } from "./components/canvas/Canvas";
-import { Toolbar } from "./components/toolbar/Toolbar";
+import { Canvas } from "./components/Canvas/Canvas";
+import { Toolbar } from "./components/Toolbar/Toolbar";
 
 function App() {
   return (
