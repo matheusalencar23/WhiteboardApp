@@ -1,0 +1,5 @@
+.canvas {
+  background-color: beige;
+  touch-action: none;
+  display: block;
+}
