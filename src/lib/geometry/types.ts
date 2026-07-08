@@ -23,6 +23,7 @@ export interface IElement {
   strokeWidth: number;
   roughness: number;
   bowing: number;
+  seed: number;
 
   draw(_rc: RoughCanvas): void;
 }

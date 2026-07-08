@@ -30,6 +30,7 @@ export class Rectangle extends Element {
       fill: this._fill || undefined,
       fillStyle: this._fillStyle,
       bowing: this._bowing,
+      seed: this._seed,
     });
   }
 }

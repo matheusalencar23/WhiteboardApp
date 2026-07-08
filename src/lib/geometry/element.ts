@@ -10,6 +10,7 @@ export class Element implements IElement {
   protected _strokeWidth: number;
   protected _roughness: number;
   protected _bowing: number;
+  protected _seed: number;
 
   get id() {
     return this._id;
@@ -26,14 +27,21 @@ export class Element implements IElement {
   get stroke() {
     return this._stroke;
   }
+
   get strokeWidth() {
     return this._strokeWidth;
   }
+
   get roughness() {
     return this._roughness;
   }
+
   get bowing() {
     return this._bowing;
+  }
+
+  get seed() {
+    return this._seed;
   }
 
   constructor(x: number, y: number, properties: Properties = {}) {
@@ -44,6 +52,7 @@ export class Element implements IElement {
     this._strokeWidth = properties.strokeWidth || 2;
     this._roughness = properties.roughness || 1.5;
     this._bowing = properties.bowing || 1;
+    this._seed = Math.floor(Math.random() * 100000);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -51,5 +60,3 @@ export class Element implements IElement {
     throw new Error("Method draw() needs to be implemented!");
   }
 }
-
-
