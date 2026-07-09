@@ -33,14 +33,29 @@ export function render(
 
   elements.forEach((el) => el.draw(rc));
 
-  const { selectedElementId } = useCanvasStore.getState();
+  const { selectedElementId, selectedElementIds, selectionBox } =
+    useCanvasStore.getState();
+
+  if (selectionBox) {
+    drawSelectionBox(ctx, zoom, selectionBox);
+  }
 
   if (selectedElementId) {
     const selectedEl = elements.find((el) => el.id === selectedElementId);
 
     if (selectedEl) {
-      drawSelectionBox(ctx, zoom, selectedEl);
+      drawGeometrySelectionBox(ctx, zoom, selectedEl);
     }
+  }
+
+  if (selectedElementIds) {
+    selectedElementIds.forEach((id) => {
+      const selectedEl = elements.find((el) => el.id === id);
+
+      if (selectedEl) {
+        drawGeometrySelectionBox(ctx, zoom, selectedEl);
+      }
+    });
   }
 
   ctx.restore();
@@ -83,22 +98,27 @@ function drawGrid(
   ctx.restore();
 }
 
-function drawSelectionBox(
+function drawGeometrySelectionBox(
   ctx: CanvasRenderingContext2D,
   zoom: number,
   selectedEl: IElement,
 ) {
   const { x, y, width, height } = selectedEl.getBounds();
+  const minX = Math.min(x, x + width);
+  const maxX = Math.max(x, x + width);
+  const minY = Math.min(y, y + height);
+  const maxY = Math.max(y, y + height);
+
   ctx.save();
 
   ctx.strokeStyle = "#3b82f6";
   ctx.lineWidth = 1.5 / zoom;
 
   const padding = 8 / zoom;
-  const boxX = x - padding;
-  const boxY = y - padding;
-  const boxWidth = width + padding * 2;
-  const boxHeight = height + padding * 2;
+  const boxX = minX - padding;
+  const boxY = minY - padding;
+  const boxWidth = maxX - minX + padding * 2;
+  const boxHeight = maxY - minY + padding * 2;
 
   ctx.setLineDash([4 / zoom, 4 / zoom]);
   ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
@@ -133,5 +153,26 @@ function drawSelectionBox(
     ctx.stroke();
   });
 
+  ctx.restore();
+}
+
+function drawSelectionBox(
+  ctx: CanvasRenderingContext2D,
+  zoom: number,
+  box: { start: Point; current: Point },
+) {
+  const minX = Math.min(box.start.x, box.current.x);
+  const maxX = Math.max(box.start.x, box.current.x);
+  const minY = Math.min(box.start.y, box.current.y);
+  const maxY = Math.max(box.start.y, box.current.y);
+
+  ctx.save();
+
+  ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
+  ctx.strokeStyle = "rgba(59, 130, 246, 0.8)";
+  ctx.lineWidth = 1 / zoom;
+
+  ctx.fillRect(minX, minY, maxX - minX, maxY - minY);
+  ctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
   ctx.restore();
 }

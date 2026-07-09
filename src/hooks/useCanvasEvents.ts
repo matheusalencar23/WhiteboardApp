@@ -7,6 +7,8 @@ import { screenToWorld } from "../lib/geometry/utils";
 export function useCanvasEvents() {
   const initialPointDraw = useRef<Point>(null);
   const elementDrawnId = useRef<string>(null);
+  // const selectionStartPoint = useRef<Point | null>(null);
+  // const selectionCurrentPoint = useRef<Point | null>(null);
 
   const {
     elements,
@@ -16,6 +18,9 @@ export function useCanvasEvents() {
     zoom,
     pan,
     setSelectedElementId,
+    setSelectedElementIds,
+    selectionBox,
+    setSelectionBox,
   } = useCanvasStore();
 
   function handlePointerDown(event: React.PointerEvent) {
@@ -35,7 +40,14 @@ export function useCanvasEvents() {
         }
       }
 
-      setSelectedElementId(clickedElementId);
+      if (clickedElementId) {
+        setSelectedElementId(clickedElementId);
+        setSelectedElementIds([]);
+      } else {
+        setSelectedElementId(null);
+        setSelectionBox({ start: worldPoint, current: worldPoint });
+      }
+
       return;
     }
 
@@ -47,17 +59,41 @@ export function useCanvasEvents() {
   function handlePointerUp() {
     initialPointDraw.current = null;
     elementDrawnId.current = null;
+    setSelectionBox(null);
   }
 
   function handlePointerMove(event: React.PointerEvent) {
-    if (!initialPointDraw.current || !elementDrawnId.current) return;
-
     const x = event.nativeEvent.offsetX;
     const y = event.nativeEvent.offsetY;
 
     const worldPoint = screenToWorld(x, y, zoom, pan);
 
-    if (activeTool === "selection") return;
+    if (activeTool === "selection") {
+      if (!selectionBox) return;
+      const { start, current } = selectionBox!;
+      if (!start || !current) return;
+      setSelectionBox({ start, current: worldPoint });
+      const minX = Math.min(start.x, current.x);
+      const maxX = Math.max(start.x, current.x);
+      const minY = Math.min(start.y, current.y);
+      const maxY = Math.max(start.y, current.y);
+
+      const elementsInsideIds = elements
+        .filter((el) => {
+          const { x, y, width, height } = el.getBounds();
+
+          return (
+            x >= minX && x + width <= maxX && y >= minY && y + height <= maxY
+          );
+        })
+        .map((el) => el.id);
+
+      setSelectedElementIds(elementsInsideIds);
+
+      return;
+    }
+
+    if (!initialPointDraw.current || !elementDrawnId.current) return;
 
     const startX = initialPointDraw.current.x;
     const startY = initialPointDraw.current.y;

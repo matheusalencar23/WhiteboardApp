@@ -1,23 +1,29 @@
+import type { Tool } from "../../lib/canvas/types";
 import { useCanvasStore } from "../../store/useCanvasStore";
 import "./style.css";
 
+const tools: Tool[] = ["selection", "rectangle"];
+
 export function Toolbar() {
-  const { activeTool, setTool } = useCanvasStore();
+  const { activeTool, setTool, setSelectedElementId, setSelectedElementIds } =
+    useCanvasStore();
+
+  function selectTool(tool: Tool) {
+    setSelectedElementId(null);
+    setSelectedElementIds([]);
+    setTool(tool);
+  }
 
   return (
     <div className="toolbar">
-      <button
-        onClick={() => setTool("selection")}
-        style={{ fontWeight: activeTool === "selection" ? "bold" : "normal" }}
-      >
-        Selecionar
-      </button>
-      <button
-        onClick={() => setTool("rectangle")}
-        style={{ fontWeight: activeTool === "rectangle" ? "bold" : "normal" }}
-      >
-        Retângulo
-      </button>
+      {tools.map((tool) => (
+        <button
+          onClick={() => selectTool(tool)}
+          style={{ fontWeight: activeTool === tool ? "bold" : "normal" }}
+        >
+          {tool}
+        </button>
+      ))}
       <h1>T</h1>
       <h1>O</h1>
       <h1>O</h1>

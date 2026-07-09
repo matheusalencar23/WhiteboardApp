@@ -8,8 +8,16 @@ import { screenToWorld } from "../../lib/geometry/utils";
 export function Canvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { elements, zoom, pan, setZoomAndPan, setPan, selectedElementId } =
-    useCanvasStore();
+  const {
+    elements,
+    zoom,
+    pan,
+    setZoomAndPan,
+    setPan,
+    selectedElementId,
+    selectedElementIds,
+    selectionBox,
+  } = useCanvasStore();
   const { handlePointerDown, handlePointerMove, handlePointerUp } =
     useCanvasEvents();
 
@@ -34,7 +42,15 @@ export function Canvas() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     render(canvas, elements, zoom, pan);
-  }, [elements, pan, zoom, dimensions, selectedElementId]);
+  }, [
+    elements,
+    pan,
+    zoom,
+    dimensions,
+    selectedElementId,
+    selectedElementIds,
+    selectionBox,
+  ]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

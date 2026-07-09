@@ -20,6 +20,12 @@ interface CanvasStore {
 
   selectedElementId: string | null;
   setSelectedElementId: (elementId: string | null) => void;
+
+  selectedElementIds: string[];
+  setSelectedElementIds: (ids: string[]) => void;
+
+  selectionBox: { start: Point; current: Point } | null;
+  setSelectionBox: (box: { start: Point; current: Point } | null) => void;
 }
 
 export const useCanvasStore = create<CanvasStore>((set) => ({
@@ -48,4 +54,11 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
   selectedElementId: null,
   setSelectedElementId: (elementId) =>
     set(() => ({ selectedElementId: elementId })),
+
+  selectedElementIds: [],
+  setSelectedElementIds: (elementIds) =>
+    set(() => ({ selectedElementIds: elementIds })),
+
+  selectionBox: null,
+  setSelectionBox: (box) => set(() => ({ selectionBox: box })),
 }));
