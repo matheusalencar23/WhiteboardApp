@@ -9,21 +9,24 @@ export function render(
 ) {
   const ctx = canvas.getContext("2d")!;
   const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.getBoundingClientRect();
 
-  canvas.width = rect.width * dpr;
-  canvas.height = rect.height * dpr;
-  canvas.style.width = `${rect.width}px`;
-  canvas.style.height = `${rect.height}px`;
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.scale(dpr, dpr);
 
   ctx.save();
   ctx.translate(pan.x, pan.y);
   ctx.scale(zoom, zoom);
 
-  drawGrid(ctx, rect.width, rect.height, zoom, pan);
+  drawGrid(ctx, width, height, zoom, pan);
 
   const rc = rough.canvas(canvas);
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./style.css";
 import { useCanvasStore } from "../../store/useCanvasStore";
 import { render } from "../../lib/canvas/engine";
@@ -12,11 +12,28 @@ export function Canvas() {
   const { handlePointerDown, handlePointerMove, handlePointerUp } =
     useCanvasEvents();
 
+  const [dimensions, setDimensions] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  useEffect(() => {
+    function handleResize() {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     render(canvas, elements, zoom, pan);
-  }, [elements, pan, zoom]);
+  }, [elements, pan, zoom, dimensions]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -42,14 +59,15 @@ export function Canvas() {
 
         setZoomAndPan(zoomClamped, { x: novoPanX, y: novoPanY });
       } else if (event.shiftKey) {
-        setPan((prevPan) => {
-          console.log(prevPan, event);
-          return { x: prevPan.x - event.deltaY * scrollSpeed, y: prevPan.y };
-        });
+        setPan((prevPan) => ({
+          x: prevPan.x - event.deltaY * scrollSpeed,
+          y: prevPan.y,
+        }));
       } else {
-        setPan((prevPan) => {
-          return { x: prevPan.x, y: prevPan.y - event.deltaY * scrollSpeed };
-        });
+        setPan((prevPan) => ({
+          x: prevPan.x,
+          y: prevPan.y - event.deltaY * scrollSpeed,
+        }));
       }
     };
 
@@ -61,8 +79,8 @@ export function Canvas() {
     <canvas
       ref={canvasRef}
       className="canvas"
-      width={window.innerWidth}
-      height={window.innerHeight}
+      width={dimensions.width}
+      height={dimensions.height}
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
       onPointerMove={handlePointerMove}
