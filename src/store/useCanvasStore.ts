@@ -7,8 +7,8 @@ interface CanvasStore {
   addElement: (el: IElement) => void;
   updateElement: (id: string, el: IElement) => void;
 
-  activeTool: Tool | null;
-  setTool: (tool: Tool | null) => void;
+  activeTool: Tool;
+  setTool: (tool: Tool) => void;
 
   zoom: number;
   setZoom: (zoom: number | ((prev: number) => number)) => void;
@@ -17,6 +17,9 @@ interface CanvasStore {
   setPan: (pan: Point | ((prev: Point) => Point)) => void;
 
   setZoomAndPan: (zoom: number, pan: Point) => void;
+
+  selectedElementId: string | null;
+  setSelectedElementId: (elementId: string | null) => void;
 }
 
 export const useCanvasStore = create<CanvasStore>((set) => ({
@@ -27,7 +30,7 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
       elements: state.elements.map((el) => (el.id === id ? newEl : el)),
     })),
 
-  activeTool: null,
+  activeTool: "selection",
   setTool: (tool) => set({ activeTool: tool }),
 
   zoom: 1,
@@ -41,4 +44,8 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
     set((state) => ({ pan: typeof pan === "function" ? pan(state.pan) : pan })),
 
   setZoomAndPan: (zoom, pan) => set(() => ({ zoom, pan })),
+
+  selectedElementId: null,
+  setSelectedElementId: (elementId) =>
+    set(() => ({ selectedElementId: elementId })),
 }));

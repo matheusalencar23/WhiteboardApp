@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import type { RoughCanvas } from "roughjs/bin/canvas";
-import type { IElement, Properties } from "./types";
+import type { IElement, Point, Properties } from "./types";
 
 export class Element implements IElement {
   protected _id: string;
@@ -58,5 +58,14 @@ export class Element implements IElement {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   draw(_rc: RoughCanvas) {
     throw new Error("Method draw() needs to be implemented!");
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  containsPoint(_point: Point): boolean {
+    throw new Error("Method containsPoint() needs to be implemented!");
+  }
+
+  getBounds(): { x: number; y: number; width: number; height: number } {
+    throw new Error("Method getBounds() needs to be implemented!");
   }
 }

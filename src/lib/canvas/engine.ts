@@ -1,5 +1,6 @@
 import rough from "roughjs";
 import type { IElement, Point } from "../geometry/types";
+import { useCanvasStore } from "../../store/useCanvasStore";
 
 export function render(
   canvas: HTMLCanvasElement,
@@ -31,6 +32,16 @@ export function render(
   const rc = rough.canvas(canvas);
 
   elements.forEach((el) => el.draw(rc));
+
+  const { selectedElementId } = useCanvasStore.getState();
+
+  if (selectedElementId) {
+    const selectedEl = elements.find((el) => el.id === selectedElementId);
+
+    if (selectedEl) {
+      drawSelectionBox(ctx, zoom, selectedEl);
+    }
+  }
 
   ctx.restore();
 }
@@ -68,6 +79,59 @@ function drawGrid(
     ctx.lineTo(endX, y);
     ctx.stroke();
   }
+
+  ctx.restore();
+}
+
+function drawSelectionBox(
+  ctx: CanvasRenderingContext2D,
+  zoom: number,
+  selectedEl: IElement,
+) {
+  const { x, y, width, height } = selectedEl.getBounds();
+  ctx.save();
+
+  ctx.strokeStyle = "#3b82f6";
+  ctx.lineWidth = 1.5 / zoom;
+
+  const padding = 8 / zoom;
+  const boxX = x - padding;
+  const boxY = y - padding;
+  const boxWidth = width + padding * 2;
+  const boxHeight = height + padding * 2;
+
+  ctx.setLineDash([4 / zoom, 4 / zoom]);
+  ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+  ctx.setLineDash([]);
+
+  const handleSize = 8 / zoom;
+  const halfHandle = handleSize / 2;
+
+  ctx.fillStyle = "#ffffff";
+  ctx.lineWidth = 1.5 / zoom;
+
+  const handlers = [
+    { x: boxX, y: boxY },
+    { x: boxX + boxWidth, y: boxY },
+    { x: boxX + boxWidth, y: boxY + boxHeight },
+    { x: boxX, y: boxY + boxHeight },
+    { x: boxX + boxWidth / 2, y: boxY },
+    { x: boxX + boxWidth, y: boxY + boxHeight / 2 },
+    { x: boxX + boxWidth / 2, y: boxY + boxHeight },
+    { x: boxX, y: boxY + boxHeight / 2 },
+  ];
+
+  handlers.forEach((handle) => {
+    ctx.beginPath();
+    ctx.rect(
+      handle.x - halfHandle,
+      handle.y - halfHandle,
+      handleSize,
+      handleSize,
+    );
+    ctx.fill();
+    ctx.stroke();
+  });
 
   ctx.restore();
 }

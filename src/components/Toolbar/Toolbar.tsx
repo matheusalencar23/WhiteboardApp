@@ -7,6 +7,12 @@ export function Toolbar() {
   return (
     <div className="toolbar">
       <button
+        onClick={() => setTool("selection")}
+        style={{ fontWeight: activeTool === "selection" ? "bold" : "normal" }}
+      >
+        Selecionar
+      </button>
+      <button
         onClick={() => setTool("rectangle")}
         style={{ fontWeight: activeTool === "rectangle" ? "bold" : "normal" }}
       >

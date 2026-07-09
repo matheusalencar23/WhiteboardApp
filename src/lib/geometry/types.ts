@@ -26,4 +26,6 @@ export interface IElement {
   seed: number;
 
   draw(_rc: RoughCanvas): void;
+  containsPoint(point: Point): boolean;
+  getBounds(): { x: number; y: number; width: number; height: number };
 }
