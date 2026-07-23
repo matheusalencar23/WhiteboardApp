@@ -100,3 +100,12 @@ export function calculateResizeBounds(
 
   return { x, y, width, height };
 }
+
+export function getBoundsFromPoints(start: Point, current: Point): Bounds {
+  const x = Math.min(start.x, current.x);
+  const y = Math.min(start.y, current.y);
+  const width = Math.abs(current.x - start.x);
+  const height = Math.abs(current.y - start.y);
+
+  return { x, y, width, height };
+}

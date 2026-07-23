@@ -16,6 +16,7 @@ export function Canvas() {
     setPan,
     selectedElementIds,
     selectionBox,
+    cursor,
   } = useCanvasStore();
   const { handlePointerDown, handlePointerMove, handlePointerUp } =
     useCanvasEvents();
@@ -82,6 +83,13 @@ export function Canvas() {
     canvas.addEventListener("wheel", handleWheel, { passive: false });
     return () => canvas.removeEventListener("wheel", handleWheel);
   }, [zoom, pan, setPan, setZoomAndPan]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    canvas.style.cursor = cursor;
+  }, [cursor]);
 
   return (
     <canvas

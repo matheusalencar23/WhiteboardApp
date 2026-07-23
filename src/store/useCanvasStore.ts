@@ -23,6 +23,10 @@ interface CanvasStore {
 
   selectionBox: { start: Point; current: Point } | null;
   setSelectionBox: (box: { start: Point; current: Point } | null) => void;
+
+  cursor: string;
+  setCursor: (cursor: string) => void;
+  clearCursor: () => void;
 }
 
 export const useCanvasStore = create<CanvasStore>((set) => ({
@@ -54,4 +58,8 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
 
   selectionBox: null,
   setSelectionBox: (box) => set(() => ({ selectionBox: box })),
+
+  cursor: "default",
+  setCursor: (cursor) => set(() => ({ cursor })),
+  clearCursor: () => set(() => ({ cursor: "default" })),
 }));

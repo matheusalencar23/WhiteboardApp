@@ -4,6 +4,7 @@ import { useCanvasStore } from "../store/useCanvasStore";
 import { ElementFactory } from "../lib/geometry/elementFactory";
 import {
   calculateResizeBounds,
+  getBoundsFromPoints,
   getHandleAtPoint,
   screenToWorld,
 } from "../lib/geometry/utils";
@@ -25,6 +26,8 @@ export function useCanvasEvents() {
     setSelectedElementIds,
     selectionBox,
     setSelectionBox,
+    setCursor,
+    clearCursor,
   } = useCanvasStore();
 
   function handlePointerDown(event: React.PointerEvent) {
@@ -44,6 +47,7 @@ export function useCanvasEvents() {
           const handle = getHandleAtPoint(worldPoint, bounds, zoom);
 
           if (handle) {
+            setCursor("grabbing");
             activeHandle.current = handle;
             initialBounds.current = bounds;
             return;
@@ -81,6 +85,7 @@ export function useCanvasEvents() {
     elementDrawnId.current = null;
     activeHandle.current = null;
     initialBounds.current = null;
+    clearCursor();
     setSelectionBox(null);
   }
 
@@ -89,6 +94,24 @@ export function useCanvasEvents() {
     const y = event.nativeEvent.offsetY;
 
     const worldPoint = screenToWorld(x, y, zoom, pan);
+
+    if (
+      !activeHandle.current &&
+      selectedElementIds &&
+      selectedElementIds.length === 1
+    ) {
+      const selectedEl = elements.find((el) => el.id === selectedElementIds[0]);
+      if (selectedEl) {
+        const bounds = selectedEl.getBounds();
+        const handle = getHandleAtPoint(worldPoint, bounds, zoom);
+
+        if (handle) {
+          setCursor("grab");
+        } else {
+          clearCursor();
+        }
+      }
+    }
 
     if (
       activeHandle.current &&
