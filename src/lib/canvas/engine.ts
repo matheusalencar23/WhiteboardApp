@@ -38,7 +38,7 @@ export function render(
     useCanvasStore.getState();
 
   if (selectionBox) {
-    drawSelectionBox(ctx, zoom, selectionBox);
+    drawSelectionContainer(ctx, zoom, selectionBox);
   }
 
   if (selectedElementId) {
@@ -159,7 +159,7 @@ function drawGeometrySelectionBox(
   ctx.restore();
 }
 
-function drawSelectionBox(
+function drawSelectionContainer(
   ctx: CanvasRenderingContext2D,
   zoom: number,
   box: { start: Point; current: Point },

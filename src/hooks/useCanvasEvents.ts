@@ -7,8 +7,6 @@ import { screenToWorld } from "../lib/geometry/utils";
 export function useCanvasEvents() {
   const initialPointDraw = useRef<Point>(null);
   const elementDrawnId = useRef<string>(null);
-  // const selectionStartPoint = useRef<Point | null>(null);
-  // const selectionCurrentPoint = useRef<Point | null>(null);
 
   const {
     elements,
@@ -24,6 +22,9 @@ export function useCanvasEvents() {
   } = useCanvasStore();
 
   function handlePointerDown(event: React.PointerEvent) {
+    setSelectedElementId(null);
+    setSelectedElementIds([]);
+    
     const x = event.nativeEvent.offsetX;
     const y = event.nativeEvent.offsetY;
 
