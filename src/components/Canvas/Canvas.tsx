@@ -14,7 +14,6 @@ export function Canvas() {
     pan,
     setZoomAndPan,
     setPan,
-    selectedElementId,
     selectedElementIds,
     selectionBox,
   } = useCanvasStore();
@@ -42,15 +41,7 @@ export function Canvas() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     render(canvas, elements, zoom, pan);
-  }, [
-    elements,
-    pan,
-    zoom,
-    dimensions,
-    selectedElementId,
-    selectedElementIds,
-    selectionBox,
-  ]);
+  }, [elements, pan, zoom, dimensions, selectedElementIds, selectionBox]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -71,10 +62,10 @@ export function Canvas() {
           event.deltaY < 0 ? zoom * zoomFactor : zoom / zoomFactor;
         const zoomClamped = Math.max(0.1, Math.min(8, newZoom));
 
-        const novoPanX = mouseX - worldPoint.x * zoomClamped;
-        const novoPanY = mouseY - worldPoint.y * zoomClamped;
+        const newPanX = mouseX - worldPoint.x * zoomClamped;
+        const newPanY = mouseY - worldPoint.y * zoomClamped;
 
-        setZoomAndPan(zoomClamped, { x: novoPanX, y: novoPanY });
+        setZoomAndPan(zoomClamped, { x: newPanX, y: newPanY });
       } else if (event.shiftKey) {
         setPan((prevPan) => ({
           x: prevPan.x - event.deltaY * scrollSpeed,

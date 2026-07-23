@@ -1,4 +1,4 @@
-import type { Bounds, IElement, Point } from "./types";
+import type { Bounds, HandleType, IElement, Point } from "./types";
 
 export function screenToWorld(
   screenX: number,
@@ -40,4 +40,63 @@ export function getGroupBounds(elements: IElement[]): Bounds | null {
     width: maxX - minX,
     height: maxY - minY,
   };
+}
+
+export function getHandleAtPoint(
+  point: Point,
+  bounds: Bounds,
+  zoom: number,
+): HandleType | null {
+  const padding = 8 / zoom;
+  const handleSize = 10 / zoom;
+  const halfHandle = handleSize / 2;
+
+  const boxX = bounds.x - padding;
+  const boxY = bounds.y - padding;
+  const boxWidth = bounds.width + padding * 2;
+  const boxHeight = bounds.height + padding * 2;
+
+  const handles: Record<HandleType, Point> = {
+    nw: { x: boxX, y: boxY },
+    n: { x: boxX + boxWidth / 2, y: boxY },
+    ne: { x: boxX + boxWidth, y: boxY },
+    e: { x: boxX + boxWidth, y: boxY + boxHeight / 2 },
+    se: { x: boxX + boxWidth, y: boxY + boxHeight },
+    s: { x: boxX + boxWidth / 2, y: boxY + boxHeight },
+    sw: { x: boxX, y: boxY + boxHeight },
+    w: { x: boxX, y: boxY + boxHeight / 2 },
+  };
+
+  for (const [type, h] of Object.entries(handles)) {
+    if (
+      point.x >= h.x - halfHandle &&
+      point.x <= h.x + halfHandle &&
+      point.y >= h.y - halfHandle &&
+      point.y <= h.y + halfHandle
+    ) {
+      return type as HandleType;
+    }
+  }
+
+  return null;
+}
+
+export function calculateResizeBounds(
+  initialBounds: Bounds,
+  handle: HandleType,
+  currentPoint: Point,
+) {
+  let { x, y, width, height } = initialBounds;
+
+  const right = x + width;
+  const bottom = y + height;
+
+  switch (handle) {
+    case "se":
+      width = currentPoint.x - x;
+      height = currentPoint.y - y;
+      break;
+  }
+
+  return { x, y, width, height };
 }

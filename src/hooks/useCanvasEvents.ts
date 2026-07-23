@@ -1,12 +1,18 @@
 import { useRef } from "react";
-import type { Point } from "../lib/geometry/types";
+import type { Bounds, HandleType, Point } from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
 import { ElementFactory } from "../lib/geometry/elementFactory";
-import { screenToWorld } from "../lib/geometry/utils";
+import {
+  calculateResizeBounds,
+  getHandleAtPoint,
+  screenToWorld,
+} from "../lib/geometry/utils";
 
 export function useCanvasEvents() {
   const initialPointDraw = useRef<Point>(null);
   const elementDrawnId = useRef<string>(null);
+  const activeHandle = useRef<HandleType | null>(null);
+  const initialBounds = useRef<Bounds | null>(null);
 
   const {
     elements,
@@ -15,16 +21,13 @@ export function useCanvasEvents() {
     activeTool,
     zoom,
     pan,
-    setSelectedElementId,
+    selectedElementIds,
     setSelectedElementIds,
     selectionBox,
     setSelectionBox,
   } = useCanvasStore();
 
   function handlePointerDown(event: React.PointerEvent) {
-    setSelectedElementId(null);
-    setSelectedElementIds([]);
-    
     const x = event.nativeEvent.offsetX;
     const y = event.nativeEvent.offsetY;
 
@@ -32,6 +35,23 @@ export function useCanvasEvents() {
     initialPointDraw.current = worldPoint;
 
     if (activeTool === "selection") {
+      if (selectedElementIds && selectedElementIds.length === 1) {
+        const selectedEl = elements.find(
+          (el) => el.id === selectedElementIds[0],
+        );
+        if (selectedEl) {
+          const bounds = selectedEl.getBounds();
+          const handle = getHandleAtPoint(worldPoint, bounds, zoom);
+
+          if (handle) {
+            activeHandle.current = handle;
+            initialBounds.current = bounds;
+            return;
+          }
+        }
+      }
+
+      setSelectedElementIds([]);
       let clickedElementId: string | null = null;
 
       for (let i = elements.length - 1; i >= 0; i--) {
@@ -42,10 +62,9 @@ export function useCanvasEvents() {
       }
 
       if (clickedElementId) {
-        setSelectedElementId(clickedElementId);
-        setSelectedElementIds([]);
+        setSelectedElementIds([clickedElementId]);
       } else {
-        setSelectedElementId(null);
+        setSelectedElementIds([]);
         setSelectionBox({ start: worldPoint, current: worldPoint });
       }
 
@@ -60,6 +79,8 @@ export function useCanvasEvents() {
   function handlePointerUp() {
     initialPointDraw.current = null;
     elementDrawnId.current = null;
+    activeHandle.current = null;
+    initialBounds.current = null;
     setSelectionBox(null);
   }
 
@@ -68,6 +89,34 @@ export function useCanvasEvents() {
     const y = event.nativeEvent.offsetY;
 
     const worldPoint = screenToWorld(x, y, zoom, pan);
+
+    if (
+      activeHandle.current &&
+      initialBounds.current &&
+      selectedElementIds &&
+      selectedElementIds.length === 1
+    ) {
+      const id = selectedElementIds[0];
+      const selectedEl = elements.find((el) => el.id === id);
+      if (!selectedEl) return;
+
+      const newBounds = calculateResizeBounds(
+        initialBounds.current,
+        activeHandle.current,
+        worldPoint,
+      );
+
+      const el = ElementFactory.create(
+        selectedEl.type!,
+        newBounds.x,
+        newBounds.y,
+        newBounds.width,
+        newBounds.height,
+        { id },
+      );
+      updateElement(id, el);
+      return;
+    }
 
     if (activeTool === "selection") {
       if (!selectionBox) return;

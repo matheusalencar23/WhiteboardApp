@@ -18,9 +18,6 @@ interface CanvasStore {
 
   setZoomAndPan: (zoom: number, pan: Point) => void;
 
-  selectedElementId: string | null;
-  setSelectedElementId: (elementId: string | null) => void;
-
   selectedElementIds: string[];
   setSelectedElementIds: (ids: string[]) => void;
 
@@ -50,10 +47,6 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
     set((state) => ({ pan: typeof pan === "function" ? pan(state.pan) : pan })),
 
   setZoomAndPan: (zoom, pan) => set(() => ({ zoom, pan })),
-
-  selectedElementId: null,
-  setSelectedElementId: (elementId) =>
-    set(() => ({ selectedElementId: elementId })),
 
   selectedElementIds: [],
   setSelectedElementIds: (elementIds) =>

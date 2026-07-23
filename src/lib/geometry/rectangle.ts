@@ -16,6 +16,7 @@ export class Rectangle extends Element {
     properties: Properties = {},
   ) {
     super(x, y, properties);
+    this._type = "rectangle";
     this._width = width;
     this._height = height;
     this._fill = properties.fill || null;

@@ -17,11 +17,10 @@ const tools: { name: Tool; icon: IconType }[] = [
 ];
 
 export function Toolbar() {
-  const { activeTool, setTool, setSelectedElementId, setSelectedElementIds } =
+  const { activeTool, setTool, setSelectedElementIds } =
     useCanvasStore();
 
   function selectTool(tool: Tool) {
-    setSelectedElementId(null);
     setSelectedElementIds([]);
     setTool(tool);
   }
@@ -30,6 +29,7 @@ export function Toolbar() {
     <div className="toolbar">
       {tools.map((tool) => (
         <button
+          key={tool.name}
           onClick={() => selectTool(tool.name)}
           className={activeTool === tool.name ? "active" : ""}
           title={tool.name}

@@ -34,30 +34,31 @@ export function render(
 
   elements.forEach((el) => el.draw(rc));
 
-  const { selectedElementId, selectedElementIds, selectionBox } =
-    useCanvasStore.getState();
+  const { selectedElementIds, selectionBox } = useCanvasStore.getState();
 
   if (selectionBox) {
     drawSelectionContainer(ctx, zoom, selectionBox);
   }
 
-  if (selectedElementId) {
-    const selectedEl = elements.find((el) => el.id === selectedElementId);
-
-    if (selectedEl) {
-      drawGeometrySelectionBox(ctx, zoom, selectedEl.getBounds());
-    }
-  }
-
   if (selectedElementIds && selectedElementIds.length > 0) {
-    const selectedElements = elements.filter((el) =>
-      selectedElementIds.includes(el.id),
-    );
+    if (selectedElementIds.length === 1) {
+      const selectedEl = elements.find((el) => el.id === selectedElementIds[0]);
 
-    const groupBounds = getGroupBounds(selectedElements);
+      if (selectedEl) {
+        drawGeometrySelectionBox(ctx, zoom, selectedEl.getBounds());
+      }
+    }
 
-    if (groupBounds) {
-      drawGeometrySelectionBox(ctx, zoom, groupBounds);
+    if (selectedElementIds.length > 1) {
+      const selectedElements = elements.filter((el) =>
+        selectedElementIds.includes(el.id),
+      );
+
+      const groupBounds = getGroupBounds(selectedElements);
+
+      if (groupBounds) {
+        drawGeometrySelectionBox(ctx, zoom, groupBounds);
+      }
     }
   }
 

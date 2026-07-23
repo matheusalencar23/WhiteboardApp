@@ -1,9 +1,11 @@
 import { nanoid } from "nanoid";
 import type { RoughCanvas } from "roughjs/bin/canvas";
 import type { IElement, Point, Properties } from "./types";
+import type { Tool } from "../canvas/types";
 
 export class Element implements IElement {
   protected _id: string;
+  protected _type: Exclude<Tool, "selection"> | null;
   protected _x: number;
   protected _y: number;
   protected _stroke: string;
@@ -14,6 +16,10 @@ export class Element implements IElement {
 
   get id() {
     return this._id;
+  }
+
+  get type() {
+    return this._type;
   }
 
   get x() {
@@ -46,6 +52,7 @@ export class Element implements IElement {
 
   constructor(x: number, y: number, properties: Properties = {}) {
     this._id = properties.id || nanoid();
+    this._type = null;
     this._x = x;
     this._y = y;
     this._stroke = properties.stroke || "#000000";
