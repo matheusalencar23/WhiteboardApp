@@ -1,8 +1,20 @@
 import type { Tool } from "../../lib/canvas/types";
 import { useCanvasStore } from "../../store/useCanvasStore";
+import { FaMousePointer } from "react-icons/fa";
+import { RiRectangleLine } from "react-icons/ri";
 import "./style.css";
+import type { IconType } from "react-icons";
 
-const tools: Tool[] = ["selection", "rectangle"];
+const tools: { name: Tool; icon: IconType }[] = [
+  {
+    name: "selection",
+    icon: FaMousePointer,
+  },
+  {
+    name: "rectangle",
+    icon: RiRectangleLine,
+  },
+];
 
 export function Toolbar() {
   const { activeTool, setTool, setSelectedElementId, setSelectedElementIds } =
@@ -18,19 +30,13 @@ export function Toolbar() {
     <div className="toolbar">
       {tools.map((tool) => (
         <button
-          onClick={() => selectTool(tool)}
-          style={{ fontWeight: activeTool === tool ? "bold" : "normal" }}
+          onClick={() => selectTool(tool.name)}
+          className={activeTool === tool.name ? "active" : ""}
+          title={tool.name}
         >
-          {tool}
+          {<tool.icon size={16} />}
         </button>
       ))}
-      <h1>T</h1>
-      <h1>O</h1>
-      <h1>O</h1>
-      <h1>L</h1>
-      <h1>B</h1>
-      <h1>A</h1>
-      <h1>R</h1>
     </div>
   );
 }

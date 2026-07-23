@@ -1,6 +1,7 @@
 import rough from "roughjs";
-import type { IElement, Point } from "../geometry/types";
+import type { Bounds, IElement, Point } from "../geometry/types";
 import { useCanvasStore } from "../../store/useCanvasStore";
+import { getGroupBounds } from "../geometry/utils";
 
 export function render(
   canvas: HTMLCanvasElement,
@@ -44,18 +45,20 @@ export function render(
     const selectedEl = elements.find((el) => el.id === selectedElementId);
 
     if (selectedEl) {
-      drawGeometrySelectionBox(ctx, zoom, selectedEl);
+      drawGeometrySelectionBox(ctx, zoom, selectedEl.getBounds());
     }
   }
 
-  if (selectedElementIds) {
-    selectedElementIds.forEach((id) => {
-      const selectedEl = elements.find((el) => el.id === id);
+  if (selectedElementIds && selectedElementIds.length > 0) {
+    const selectedElements = elements.filter((el) =>
+      selectedElementIds.includes(el.id),
+    );
 
-      if (selectedEl) {
-        drawGeometrySelectionBox(ctx, zoom, selectedEl);
-      }
-    });
+    const groupBounds = getGroupBounds(selectedElements);
+
+    if (groupBounds) {
+      drawGeometrySelectionBox(ctx, zoom, groupBounds);
+    }
   }
 
   ctx.restore();
@@ -101,9 +104,9 @@ function drawGrid(
 function drawGeometrySelectionBox(
   ctx: CanvasRenderingContext2D,
   zoom: number,
-  selectedEl: IElement,
+  bounds: Bounds,
 ) {
-  const { x, y, width, height } = selectedEl.getBounds();
+  const { x, y, width, height } = bounds;
   const minX = Math.min(x, x + width);
   const maxX = Math.max(x, x + width);
   const minY = Math.min(y, y + height);

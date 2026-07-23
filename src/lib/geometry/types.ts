@@ -15,6 +15,13 @@ export interface Properties {
   bowing?: number;
 }
 
+export interface Bounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface IElement {
   id: string;
   x: number;
@@ -27,5 +34,5 @@ export interface IElement {
 
   draw(_rc: RoughCanvas): void;
   containsPoint(point: Point): boolean;
-  getBounds(): { x: number; y: number; width: number; height: number };
+  getBounds(): Bounds;
 }
