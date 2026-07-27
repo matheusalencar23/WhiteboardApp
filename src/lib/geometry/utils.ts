@@ -96,16 +96,37 @@ export function calculateResizeBounds(
       width = currentPoint.x - x;
       height = currentPoint.y - y;
       break;
+    case "e":
+      width = currentPoint.x - x;
+      break;
+    case "s":
+      height = currentPoint.y - y;
+      break;
+    case "nw":
+      x = currentPoint.x;
+      y = currentPoint.y;
+      width = right - currentPoint.x;
+      height = bottom - currentPoint.y;
+      break;
+    case "n":
+      y = currentPoint.y;
+      height = bottom - currentPoint.y;
+      break;
+    case "w":
+      x = currentPoint.x;
+      width = right - currentPoint.x;
+      break;
+    case "ne":
+      y = currentPoint.y;
+      width = currentPoint.x - x;
+      height = bottom - currentPoint.y;
+      break;
+    case "sw":
+      x = currentPoint.x;
+      width = right - currentPoint.x;
+      height = currentPoint.y - y;
+      break;
   }
-
-  return { x, y, width, height };
-}
-
-export function getBoundsFromPoints(start: Point, current: Point): Bounds {
-  const x = Math.min(start.x, current.x);
-  const y = Math.min(start.y, current.y);
-  const width = Math.abs(current.x - start.x);
-  const height = Math.abs(current.y - start.y);
 
   return { x, y, width, height };
 }

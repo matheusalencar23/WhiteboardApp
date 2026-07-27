@@ -1,10 +1,15 @@
 import { useRef } from "react";
-import type { Bounds, HandleType, Point } from "../lib/geometry/types";
+import type {
+  Bounds,
+  HandleType,
+  IElement,
+  Point,
+} from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
 import { ElementFactory } from "../lib/geometry/elementFactory";
 import {
   calculateResizeBounds,
-  getBoundsFromPoints,
+  getGroupBounds,
   getHandleAtPoint,
   screenToWorld,
 } from "../lib/geometry/utils";
@@ -13,7 +18,8 @@ export function useCanvasEvents() {
   const initialPointDraw = useRef<Point>(null);
   const elementDrawnId = useRef<string>(null);
   const activeHandle = useRef<HandleType | null>(null);
-  const initialBounds = useRef<Bounds | null>(null);
+  const initialGroupBounds = useRef<Bounds | null>(null);
+  const initialElementsSnapshot = useRef<IElement[]>([]);
 
   const {
     elements,
@@ -38,19 +44,22 @@ export function useCanvasEvents() {
     initialPointDraw.current = worldPoint;
 
     if (activeTool === "selection") {
-      if (selectedElementIds && selectedElementIds.length === 1) {
-        const selectedEl = elements.find(
-          (el) => el.id === selectedElementIds[0],
+      if (selectedElementIds && selectedElementIds.length > 0) {
+        const selectedElements = elements.filter((el) =>
+          selectedElementIds.includes(el.id),
         );
-        if (selectedEl) {
-          const bounds = selectedEl.getBounds();
-          const handle = getHandleAtPoint(worldPoint, bounds, zoom);
+        if (selectedElements && selectedElements.length > 0) {
+          const bounds = getGroupBounds(selectedElements);
+          if (bounds) {
+            const handle = getHandleAtPoint(worldPoint, bounds, zoom);
 
-          if (handle) {
-            setCursor("grabbing");
-            activeHandle.current = handle;
-            initialBounds.current = bounds;
-            return;
+            if (handle) {
+              setCursor("grabbing");
+              activeHandle.current = handle;
+              initialGroupBounds.current = bounds;
+              initialElementsSnapshot.current = [...selectedElements];
+              return;
+            }
           }
         }
       }
@@ -84,7 +93,8 @@ export function useCanvasEvents() {
     initialPointDraw.current = null;
     elementDrawnId.current = null;
     activeHandle.current = null;
-    initialBounds.current = null;
+    initialGroupBounds.current = null;
+    initialElementsSnapshot.current = [];
     clearCursor();
     setSelectionBox(null);
   }
@@ -98,46 +108,66 @@ export function useCanvasEvents() {
     if (
       !activeHandle.current &&
       selectedElementIds &&
-      selectedElementIds.length === 1
+      selectedElementIds.length > 0
     ) {
-      const selectedEl = elements.find((el) => el.id === selectedElementIds[0]);
-      if (selectedEl) {
-        const bounds = selectedEl.getBounds();
-        const handle = getHandleAtPoint(worldPoint, bounds, zoom);
+      const selectedElements = elements.filter((el) =>
+        selectedElementIds.includes(el.id),
+      );
+      if (selectedElements && selectedElements.length > 0) {
+        const bounds = getGroupBounds(selectedElements);
 
-        if (handle) {
-          setCursor("grab");
-        } else {
-          clearCursor();
+        if (bounds) {
+          const handle = getHandleAtPoint(worldPoint, bounds, zoom);
+
+          if (handle) {
+            setCursor("grab");
+          } else {
+            clearCursor();
+          }
         }
       }
     }
 
     if (
       activeHandle.current &&
-      initialBounds.current &&
-      selectedElementIds &&
-      selectedElementIds.length === 1
+      initialGroupBounds.current &&
+      initialElementsSnapshot.current.length > 0
     ) {
-      const id = selectedElementIds[0];
-      const selectedEl = elements.find((el) => el.id === id);
-      if (!selectedEl) return;
-
-      const newBounds = calculateResizeBounds(
-        initialBounds.current,
+      const newGroupBounds = calculateResizeBounds(
+        initialGroupBounds.current,
         activeHandle.current,
         worldPoint,
       );
 
-      const el = ElementFactory.create(
-        selectedEl.type!,
-        newBounds.x,
-        newBounds.y,
-        newBounds.width,
-        newBounds.height,
-        { id },
-      );
-      updateElement(id, el);
+      const initialWidth = initialGroupBounds.current.width || 1;
+      const initialHeight = initialGroupBounds.current.height || 1;
+
+      initialElementsSnapshot.current.forEach((selectedEl) => {
+        const bounds = selectedEl.getBounds();
+
+        const relX = (bounds.x - initialGroupBounds.current!.x) / initialWidth;
+        const relY = (bounds.y - initialGroupBounds.current!.y) / initialHeight;
+        const relWidth = bounds.width / initialWidth;
+        const relHeight = bounds.height / initialHeight;
+
+        const newX = newGroupBounds.x + relX * newGroupBounds.width;
+        const newY = newGroupBounds.y + relY * newGroupBounds.height;
+        const newW = relWidth * newGroupBounds.width;
+        const newH = relHeight * newGroupBounds.height;
+
+        const id = selectedEl.id;
+        const el = ElementFactory.create(
+          selectedEl.type!,
+          newX,
+          newY,
+          newW,
+          newH,
+          { id },
+        );
+
+        updateElement(id, el);
+      });
+
       return;
     }
 
