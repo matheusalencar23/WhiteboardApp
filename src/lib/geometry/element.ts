@@ -50,6 +50,13 @@ export class Element implements IElement {
     return this._seed;
   }
 
+  get properties() {
+    return {
+      id: this._id,
+      seed: this._seed,
+    };
+  }
+
   constructor(x: number, y: number, properties: Properties = {}) {
     this._id = properties.id || nanoid();
     this._type = null;
@@ -59,7 +66,7 @@ export class Element implements IElement {
     this._strokeWidth = properties.strokeWidth || 2;
     this._roughness = properties.roughness || 1.5;
     this._bowing = properties.bowing || 1;
-    this._seed = Math.floor(Math.random() * 100000);
+    this._seed = properties.seed || Math.floor(Math.random() * 100000);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -4,6 +4,7 @@ import { FaMousePointer } from "react-icons/fa";
 import { RiRectangleLine } from "react-icons/ri";
 import "./style.css";
 import type { IconType } from "react-icons";
+import { IoEllipseOutline } from "react-icons/io5";
 
 const tools: { name: Tool; icon: IconType }[] = [
   {
@@ -14,11 +15,14 @@ const tools: { name: Tool; icon: IconType }[] = [
     name: "rectangle",
     icon: RiRectangleLine,
   },
+  {
+    name: "ellipse",
+    icon: IoEllipseOutline,
+  },
 ];
 
 export function Toolbar() {
-  const { activeTool, setTool, setSelectedElementIds } =
-    useCanvasStore();
+  const { activeTool, setTool, setSelectedElementIds } = useCanvasStore();
 
   function selectTool(tool: Tool) {
     setSelectedElementIds([]);

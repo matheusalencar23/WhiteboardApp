@@ -162,7 +162,7 @@ export function useCanvasEvents() {
           newY,
           newW,
           newH,
-          { id },
+          { ...selectedEl.properties },
         );
 
         updateElement(id, el);
@@ -202,7 +202,9 @@ export function useCanvasEvents() {
     const startY = initialPointDraw.current.y;
     const width = worldPoint.x - startX;
     const height = worldPoint.y - startY;
-    const id = elementDrawnId.current;
+    const elementDrawn = elements.find(
+      (el) => el.id === elementDrawnId.current,
+    );
 
     const el = ElementFactory.create(
       activeTool!,
@@ -210,9 +212,10 @@ export function useCanvasEvents() {
       startY,
       width,
       height,
-      { id },
+      { ...elementDrawn?.properties },
     );
-    updateElement(id, el);
+
+    updateElement(elementDrawnId.current, el);
   }
 
   return { handlePointerDown, handlePointerMove, handlePointerUp };

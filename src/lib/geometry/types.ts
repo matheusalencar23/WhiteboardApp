@@ -14,6 +14,7 @@ export interface Properties {
   fill?: string;
   fillStyle?: string;
   bowing?: number;
+  seed?: number;
 }
 
 export interface Bounds {
@@ -28,13 +29,12 @@ export type HandleType = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
 export interface IElement {
   id: string;
   type: Exclude<Tool, "selection"> | null;
-  x: number;
-  y: number;
   stroke: string;
   strokeWidth: number;
   roughness: number;
   bowing: number;
   seed: number;
+  properties: Properties;
 
   draw(_rc: RoughCanvas): void;
   containsPoint(point: Point): boolean;
