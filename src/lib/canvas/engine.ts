@@ -41,24 +41,20 @@ export function render(
   }
 
   if (selectedElementIds && selectedElementIds.length > 0) {
-    if (selectedElementIds.length === 1) {
-      const selectedEl = elements.find((el) => el.id === selectedElementIds[0]);
+    const selectedElements = elements.filter((el) =>
+      selectedElementIds.includes(el.id),
+    );
 
-      if (selectedEl) {
-        drawGeometrySelectionBox(ctx, zoom, selectedEl.getBounds());
-      }
+    const groupBounds = getGroupBounds(selectedElements);
+
+    if (groupBounds) {
+      drawGeometryGroupSelectionBox(ctx, zoom, groupBounds);
     }
 
     if (selectedElementIds.length > 1) {
-      const selectedElements = elements.filter((el) =>
-        selectedElementIds.includes(el.id),
+      selectedElements.forEach((el) =>
+        drawGeometrySelectionBox(ctx, zoom, el.getBounds()),
       );
-
-      const groupBounds = getGroupBounds(selectedElements);
-
-      if (groupBounds) {
-        drawGeometrySelectionBox(ctx, zoom, groupBounds);
-      }
     }
   }
 
@@ -102,7 +98,7 @@ function drawGrid(
   ctx.restore();
 }
 
-function drawGeometrySelectionBox(
+function drawGeometryGroupSelectionBox(
   ctx: CanvasRenderingContext2D,
   zoom: number,
   bounds: Bounds,
@@ -178,5 +174,34 @@ function drawSelectionContainer(
 
   ctx.fillRect(minX, minY, maxX - minX, maxY - minY);
   ctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
+  ctx.restore();
+}
+
+function drawGeometrySelectionBox(
+  ctx: CanvasRenderingContext2D,
+  zoom: number,
+  bounds: Bounds,
+) {
+  const { x, y, width, height } = bounds;
+  const minX = Math.min(x, x + width);
+  const maxX = Math.max(x, x + width);
+  const minY = Math.min(y, y + height);
+  const maxY = Math.max(y, y + height);
+
+  ctx.save();
+
+  ctx.strokeStyle = "rgb(59, 130, 246, 0.7)";
+  ctx.lineWidth = 2 / zoom;
+
+  const padding = 4 / zoom;
+  const boxX = minX - padding;
+  const boxY = minY - padding;
+  const boxWidth = maxX - minX + padding * 2;
+  const boxHeight = maxY - minY + padding * 2;
+
+  ctx.setLineDash([2 / zoom, 2 / zoom]);
+  ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+  ctx.setLineDash([]);
+
   ctx.restore();
 }
