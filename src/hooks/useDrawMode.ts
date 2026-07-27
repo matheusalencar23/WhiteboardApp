@@ -9,8 +9,6 @@ export function useDrawMode() {
 
   const { elements, activeTool, addElement, updateElement } = useCanvasStore();
 
-  const elementDrawn = elements.find((el) => el.id === elementDrawnId.current);
-
   function startDrawing(worldPoint: Point) {
     if (!activeTool || activeTool === "selection") return;
 
@@ -32,6 +30,9 @@ export function useDrawMode() {
     const startY = initialPointDraw.current.y;
     const width = worldPoint.x - startX;
     const height = worldPoint.y - startY;
+    const elementDrawn = elements.find(
+      (el) => el.id === elementDrawnId.current,
+    );
 
     const el = ElementFactory.create(
       activeTool!,
