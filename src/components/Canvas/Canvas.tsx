@@ -4,8 +4,10 @@ import { useCanvasStore } from "../../store/useCanvasStore";
 import { render } from "../../lib/canvas/engine";
 import { useCanvasEvents } from "../../hooks/useCanvasEvents";
 import { screenToWorld } from "../../lib/geometry/utils";
+import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
 
 export function Canvas() {
+  useKeyboardShortcuts();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const {

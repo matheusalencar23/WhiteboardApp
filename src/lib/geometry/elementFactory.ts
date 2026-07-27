@@ -12,7 +12,6 @@ export class ElementFactory {
     height: number = 0,
     props: Properties = {},
   ) {
-    console.log(props)
     switch (tool) {
       case "rectangle":
         return new Rectangle(x, y, width, height, props);

@@ -21,6 +21,8 @@ interface CanvasStore {
   selectedElementIds: string[];
   setSelectedElementIds: (ids: string[]) => void;
 
+  deleteSelectedElements: () => void;
+
   selectionBox: { start: Point; current: Point } | null;
   setSelectionBox: (box: { start: Point; current: Point } | null) => void;
 
@@ -55,6 +57,14 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
   selectedElementIds: [],
   setSelectedElementIds: (elementIds) =>
     set(() => ({ selectedElementIds: elementIds })),
+
+  deleteSelectedElements: () =>
+    set((state) => ({
+      elements: state.elements.filter(
+        (el) => !state.selectedElementIds.includes(el.id),
+      ),
+      selectedElementIds: [],
+    })),
 
   selectionBox: null,
   setSelectionBox: (box) => set(() => ({ selectionBox: box })),
