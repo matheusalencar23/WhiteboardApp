@@ -1,6 +1,7 @@
 import type { RoughCanvas } from "roughjs/bin/canvas";
 import type { Point, Properties } from "./types";
 import { Element } from "./element";
+import { rotatePoint } from "./utils";
 
 export class Rectangle extends Element {
   private _width;
@@ -23,7 +24,18 @@ export class Rectangle extends Element {
     this._fillStyle = properties.fillStyle || "hachure";
   }
 
-  draw(rc: RoughCanvas) {
+  draw(rc: RoughCanvas, ctx: CanvasRenderingContext2D) {
+    ctx.save();
+
+    const cx = this._x + this._width / 2;
+    const cy = this._y + this._height / 2;
+
+    if (this._angle !== 0) {
+      ctx.translate(cx, cy);
+      ctx.rotate((this._angle * Math.PI) / 180);
+      ctx.translate(-cx, -cy);
+    }
+
     rc.rectangle(this._x, this._y, this._width, this._height, {
       stroke: this._stroke,
       strokeWidth: this._strokeWidth,
@@ -33,6 +45,8 @@ export class Rectangle extends Element {
       bowing: this._bowing,
       seed: this._seed,
     });
+
+    ctx.restore();
   }
 
   containsPoint(point: Point): boolean {
@@ -52,6 +66,43 @@ export class Rectangle extends Element {
   }
 
   getBounds(): { x: number; y: number; width: number; height: number } {
-    return { x: this._x, y: this._y, width: this._width, height: this._height };
+    if (this._angle === 0) {
+      return {
+        x: this._x,
+        y: this._y,
+        width: this._width,
+        height: this._height,
+      };
+    }
+
+    const cx = this._x + this._width / 2;
+    const cy = this._y + this._height / 2;
+    const center = { x: cx, y: cy };
+
+    const corners: Point[] = [
+      { x: this._x, y: this._y },
+      { x: this._x + this._width, y: this._y },
+      { x: this._x + this._width, y: this._y + this._height },
+      { x: this._x, y: this._y + this._height },
+    ];
+
+    const rotatedCorners = corners.map((corner) =>
+      rotatePoint(corner, center, this._angle),
+    );
+
+    const xs = rotatedCorners.map((p) => p.x);
+    const ys = rotatedCorners.map((p) => p.y);
+
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY,
+    };
   }
 }

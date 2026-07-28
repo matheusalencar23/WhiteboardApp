@@ -32,7 +32,7 @@ export function render(
 
   const rc = rough.canvas(canvas);
 
-  elements.forEach((el) => el.draw(rc));
+  elements.forEach((el) => el.draw(rc, ctx));
 
   const { selectedElementIds, selectionBox } = useCanvasStore.getState();
 
@@ -152,6 +152,21 @@ function drawGeometryGroupSelectionBox(
     ctx.fill();
     ctx.stroke();
   });
+
+  const rotationOffset = 25 / zoom;
+  const topCenterX = boxX + boxWidth / 2;
+  const topCenterY = boxY;
+  const rotationY = topCenterY - rotationOffset;
+
+  ctx.beginPath();
+  ctx.moveTo(topCenterX, topCenterY - halfHandle);
+  ctx.lineTo(topCenterX, rotationY);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(topCenterX, rotationY, halfHandle, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
 
   ctx.restore();
 }

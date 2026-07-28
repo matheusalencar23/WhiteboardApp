@@ -11,7 +11,7 @@ export function useMoveMode() {
   const isDraggingElements = useRef<boolean>(false);
   const lastMouseWorldPoint = useRef<Point | null>(null);
 
-  const { elements, selectedElementIds, setCursor, updateElement, zoom } =
+  const { elements, selectedElementIds, setCursor, updateElement } =
     useCanvasStore();
 
   function selectedElements() {
@@ -24,7 +24,7 @@ export function useMoveMode() {
     const bounds = getGroupBounds(selectedElements());
     if (!bounds) return false;
 
-    const clickedOnSelected = pointInBounds(worldPoint, bounds, zoom);
+    const clickedOnSelected = pointInBounds(worldPoint, bounds);
     if (!clickedOnSelected) return false;
 
     lastMouseWorldPoint.current = worldPoint;

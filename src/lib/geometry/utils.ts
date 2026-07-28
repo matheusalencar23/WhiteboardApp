@@ -23,16 +23,10 @@ export function getGroupBounds(elements: IElement[]): Bounds | null {
 
   elements.forEach((el) => {
     const bounds = el.getBounds();
-
-    const elMinX = Math.min(bounds.x, bounds.x + bounds.width);
-    const elMaxX = Math.max(bounds.x, bounds.x + bounds.width);
-    const elMinY = Math.min(bounds.y, bounds.y + bounds.height);
-    const elMaxY = Math.max(bounds.y, bounds.y + bounds.height);
-
-    if (elMinX < minX) minX = elMinX;
-    if (elMinY < minY) minY = elMinY;
-    if (elMaxX > maxX) maxX = elMaxX;
-    if (elMaxY > maxY) maxY = elMaxY;
+    minX = Math.min(minX, bounds.x);
+    minY = Math.min(minY, bounds.y);
+    maxX = Math.max(maxX, bounds.x + bounds.width);
+    maxY = Math.max(maxY, bounds.y + bounds.height);
   });
 
   return {
@@ -66,6 +60,10 @@ export function getHandleAtPoint(
     s: { x: boxX + boxWidth / 2, y: boxY + boxHeight },
     sw: { x: boxX, y: boxY + boxHeight },
     w: { x: boxX, y: boxY + boxHeight / 2 },
+    rotation: {
+      x: boxX + boxWidth / 2,
+      y: boxY - 25 / zoom,
+    },
   };
 
   for (const [type, h] of Object.entries(handles)) {
@@ -152,11 +150,7 @@ export function moveElements(
   });
 }
 
-export function pointInBounds(
-  point: Point,
-  bounds: Bounds,
-  zoom: number,
-): boolean {
+export function pointInBounds(point: Point, bounds: Bounds): boolean {
   const left = bounds.x;
   const right = bounds.x + bounds.width;
   const top = bounds.y;
@@ -170,4 +164,37 @@ export function pointInBounds(
   return (
     point.x >= minX && point.x <= maxX && point.y >= minY && point.y <= maxY
   );
+}
+
+export function calculateRotationAngle(
+  centerPoint: Point,
+  currentMousePoint: Point,
+): number {
+  const radians = Math.atan2(
+    currentMousePoint.y - centerPoint.y,
+    currentMousePoint.x - centerPoint.x,
+  );
+
+  let degrees = (radians * 180) / Math.PI + 90;
+  if (degrees < 0) degrees += 360;
+
+  return Math.round(degrees);
+}
+
+export function rotatePoint(
+  point: Point,
+  center: Point,
+  angleInDegrees: number,
+): Point {
+  const angleInRadians = (angleInDegrees * Math.PI) / 180;
+  const cos = Math.cos(angleInRadians);
+  const sin = Math.sin(angleInRadians);
+
+  const dx = point.x - center.x;
+  const dy = point.y - center.y;
+
+  return {
+    x: center.x + dx * cos - dy * sin,
+    y: center.y + dx * sin + dy * cos,
+  };
 }

@@ -1,5 +1,10 @@
 import { create } from "zustand";
-import type { IElement, Point } from "../lib/geometry/types";
+import type {
+  Bounds,
+  HandleType,
+  IElement,
+  Point,
+} from "../lib/geometry/types";
 import type { Tool } from "../lib/canvas/types";
 
 interface CanvasStore {
@@ -29,6 +34,15 @@ interface CanvasStore {
   cursor: string;
   setCursor: (cursor: string) => void;
   clearCursor: () => void;
+
+  activeHandle: HandleType | null;
+  setActiveHandle: (handle: HandleType | null) => void;
+
+  initialGroupBounds: Bounds | null;
+  setInitialGroupBounds: (groupBounds: Bounds | null) => void;
+
+  initialElementsSnapshot: IElement[];
+  setInitialElementsSnapshot: (elements: IElement[]) => void;
 }
 
 export const useCanvasStore = create<CanvasStore>((set) => ({
@@ -72,4 +86,15 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
   cursor: "default",
   setCursor: (cursor) => set(() => ({ cursor })),
   clearCursor: () => set(() => ({ cursor: "default" })),
+
+  activeHandle: null,
+  setActiveHandle: (handle) => set(() => ({ activeHandle: handle })),
+
+  initialGroupBounds: null,
+  setInitialGroupBounds: (groupBounds: Bounds | null) =>
+    set(() => ({ initialGroupBounds: groupBounds })),
+
+  initialElementsSnapshot: [],
+  setInitialElementsSnapshot: (elements: IElement[]) =>
+    set(() => ({ initialElementsSnapshot: elements })),
 }));

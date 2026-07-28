@@ -1,10 +1,4 @@
-import { useRef } from "react";
-import type {
-  Bounds,
-  HandleType,
-  IElement,
-  Point,
-} from "../lib/geometry/types";
+import type { Point } from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
 import {
   calculateResizeBounds,
@@ -14,9 +8,8 @@ import {
 import { ElementFactory } from "../lib/geometry/elementFactory";
 
 export function useResizeMode() {
-  const activeHandle = useRef<HandleType | null>(null);
-  const initialGroupBounds = useRef<Bounds | null>(null);
-  const initialElementsSnapshot = useRef<IElement[]>([]);
+  // const initialGroupBounds = useRef<Bounds | null>(null);
+  // const initialElementsSnapshot = useRef<IElement[]>([]);
 
   const {
     elements,
@@ -25,12 +18,16 @@ export function useResizeMode() {
     selectedElementIds,
     setCursor,
     clearCursor,
+    activeHandle,
+    setActiveHandle,
+    initialGroupBounds,
+    setInitialGroupBounds,
+    initialElementsSnapshot,
+    setInitialElementsSnapshot
   } = useCanvasStore();
 
   function selectedElements() {
-    return elements.filter((el) =>
-      selectedElementIds.includes(el.id),
-    );
+    return elements.filter((el) => selectedElementIds.includes(el.id));
   }
 
   function tryStartResize(worldPoint: Point): boolean {
@@ -40,20 +37,17 @@ export function useResizeMode() {
     if (!bounds) return false;
 
     const handle = getHandleAtPoint(worldPoint, bounds, zoom);
+    if (!handle || handle === "rotation") return false;
 
-    if (handle) {
-      setCursor("grabbing");
-      activeHandle.current = handle;
-      initialGroupBounds.current = bounds;
-      initialElementsSnapshot.current = [...selectedElements()];
-      return true;
-    }
-
-    return false;
+    setCursor("grabbing");
+    setActiveHandle(handle);
+    setInitialGroupBounds(bounds);
+    setInitialElementsSnapshot([...selectedElements()]);
+    return true;
   }
 
   function updateHoverCursor(worldPoint: Point) {
-    if (activeHandle.current || selectedElements().length === 0) return;
+    if (activeHandle || selectedElements().length === 0) return;
 
     const bounds = getGroupBounds(selectedElements());
     if (!bounds) return;
@@ -66,29 +60,29 @@ export function useResizeMode() {
     }
   }
 
-  function updateResize(worldPoint: Point): boolean {
+  function resize(worldPoint: Point): boolean {
     if (
-      !activeHandle.current ||
-      !initialGroupBounds.current ||
-      initialElementsSnapshot.current.length === 0
+      !activeHandle ||
+      !initialGroupBounds ||
+      initialElementsSnapshot.length === 0
     ) {
       return false;
     }
 
     const newGroupBounds = calculateResizeBounds(
-      initialGroupBounds.current,
-      activeHandle.current,
+      initialGroupBounds,
+      activeHandle,
       worldPoint,
     );
 
-    const initialWidth = initialGroupBounds.current.width || 1;
-    const initialHeight = initialGroupBounds.current.height || 1;
+    const initialWidth = initialGroupBounds.width || 1;
+    const initialHeight = initialGroupBounds.height || 1;
 
-    initialElementsSnapshot.current.forEach((selectedEl) => {
+    initialElementsSnapshot.forEach((selectedEl) => {
       const bounds = selectedEl.getBounds();
 
-      const relX = (bounds.x - initialGroupBounds.current!.x) / initialWidth;
-      const relY = (bounds.y - initialGroupBounds.current!.y) / initialHeight;
+      const relX = (bounds.x - initialGroupBounds!.x) / initialWidth;
+      const relY = (bounds.y - initialGroupBounds!.y) / initialHeight;
       const relWidth = bounds.width / initialWidth;
       const relHeight = bounds.height / initialHeight;
 
@@ -114,20 +108,20 @@ export function useResizeMode() {
   }
 
   function stopResize() {
-    activeHandle.current = null;
-    initialGroupBounds.current = null;
-    initialElementsSnapshot.current = [];
+    setActiveHandle(null);
+    setInitialGroupBounds(null);
+    setInitialElementsSnapshot([]);
   }
 
   function isResizing() {
-    return !!activeHandle.current;
+    return !!activeHandle && activeHandle !== "rotation";
   }
 
   return {
     isResizing,
     tryStartResize,
     updateHoverCursor,
-    updateResize,
+    updateResize: resize,
     stopResize,
   };
 }

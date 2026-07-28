@@ -13,6 +13,7 @@ export class Element implements IElement {
   protected _roughness: number;
   protected _bowing: number;
   protected _seed: number;
+  protected _angle: number;
 
   get id() {
     return this._id;
@@ -50,10 +51,15 @@ export class Element implements IElement {
     return this._seed;
   }
 
+  get angle() {
+    return this._angle;
+  }
+
   get properties() {
     return {
       id: this._id,
       seed: this._seed,
+      angle: this._angle,
     };
   }
 
@@ -67,10 +73,11 @@ export class Element implements IElement {
     this._roughness = properties.roughness || 1.5;
     this._bowing = properties.bowing || 1;
     this._seed = properties.seed || Math.floor(Math.random() * 100000);
+    this._angle = properties.angle || 0;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  draw(_rc: RoughCanvas) {
+  draw(_rc: RoughCanvas, _ctx: CanvasRenderingContext2D) {
     throw new Error("Method draw() needs to be implemented!");
   }
 

@@ -4,12 +4,14 @@ import { useResizeMode } from "./useResizeMode";
 import { useSelectionMode } from "./useSelectionMode";
 import { useDrawMode } from "./useDrawMode";
 import { useMoveMode } from "./useMoveMode";
+import { useRotationMode } from "./useRotationMode";
 
 export function useCanvasEvents() {
   const resizeMode = useResizeMode();
   const selectionMode = useSelectionMode();
   const drawMode = useDrawMode();
   const moveMode = useMoveMode();
+  const rotationMode = useRotationMode();
 
   const { activeTool, zoom, pan, setSelectionBox, clearCursor } =
     useCanvasStore();
@@ -24,9 +26,10 @@ export function useCanvasEvents() {
 
     if (activeTool === "selection") {
       const hitHandle = resizeMode.tryStartResize(worldPoint);
+      const hitRotationHandle = rotationMode.tryStartRotation(worldPoint);
       const hitSelection = moveMode.tryStartMoving(worldPoint);
 
-      if (!hitHandle && !hitSelection) {
+      if (!hitHandle && !hitSelection && !hitRotationHandle) {
         selectionMode.startSelection(worldPoint);
       }
 
@@ -40,6 +43,7 @@ export function useCanvasEvents() {
     drawMode.stopDrawing();
     resizeMode.stopResize();
     moveMode.stopMoving();
+    rotationMode.stopRotation();
     clearCursor();
     setSelectionBox(null);
   }
@@ -56,6 +60,11 @@ export function useCanvasEvents() {
 
     if (resizeMode.isResizing()) {
       resizeMode.updateResize(worldPoint);
+      return;
+    }
+
+    if (rotationMode.isRotating()) {
+      rotationMode.rotate(worldPoint);
       return;
     }
 
