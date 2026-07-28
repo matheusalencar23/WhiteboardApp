@@ -27,14 +27,16 @@ export function useResizeMode() {
     clearCursor,
   } = useCanvasStore();
 
-  const selectedElements = elements.filter((el) =>
-    selectedElementIds.includes(el.id),
-  );
+  function selectedElements() {
+    return elements.filter((el) =>
+      selectedElementIds.includes(el.id),
+    );
+  }
 
   function tryStartResize(worldPoint: Point): boolean {
-    if (selectedElements.length === 0) return false;
+    if (selectedElements().length === 0) return false;
 
-    const bounds = getGroupBounds(selectedElements);
+    const bounds = getGroupBounds(selectedElements());
     if (!bounds) return false;
 
     const handle = getHandleAtPoint(worldPoint, bounds, zoom);
@@ -43,7 +45,7 @@ export function useResizeMode() {
       setCursor("grabbing");
       activeHandle.current = handle;
       initialGroupBounds.current = bounds;
-      initialElementsSnapshot.current = [...selectedElements];
+      initialElementsSnapshot.current = [...selectedElements()];
       return true;
     }
 
@@ -51,9 +53,9 @@ export function useResizeMode() {
   }
 
   function updateHoverCursor(worldPoint: Point) {
-    if (activeHandle.current || selectedElements.length === 0) return;
+    if (activeHandle.current || selectedElements().length === 0) return;
 
-    const bounds = getGroupBounds(selectedElements);
+    const bounds = getGroupBounds(selectedElements());
     if (!bounds) return;
 
     const handle = getHandleAtPoint(worldPoint, bounds, zoom);

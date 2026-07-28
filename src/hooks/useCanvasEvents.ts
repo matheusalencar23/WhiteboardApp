@@ -3,11 +3,13 @@ import { screenToWorld } from "../lib/geometry/utils";
 import { useResizeMode } from "./useResizeMode";
 import { useSelectionMode } from "./useSelectionMode";
 import { useDrawMode } from "./useDrawMode";
+import { useMoveMode } from "./useMoveMode";
 
 export function useCanvasEvents() {
   const resizeMode = useResizeMode();
   const selectionMode = useSelectionMode();
   const drawMode = useDrawMode();
+  const moveMode = useMoveMode();
 
   const { activeTool, zoom, pan, setSelectionBox, clearCursor } =
     useCanvasStore();
@@ -22,7 +24,9 @@ export function useCanvasEvents() {
 
     if (activeTool === "selection") {
       const hitHandle = resizeMode.tryStartResize(worldPoint);
-      if (!hitHandle) {
+      const hitSelection = moveMode.tryStartMoving(worldPoint);
+
+      if (!hitHandle && !hitSelection) {
         selectionMode.startSelection(worldPoint);
       }
 
@@ -35,6 +39,7 @@ export function useCanvasEvents() {
   function handlePointerUp() {
     drawMode.stopDrawing();
     resizeMode.stopResize();
+    moveMode.stopMoving();
     clearCursor();
     setSelectionBox(null);
   }
@@ -51,6 +56,11 @@ export function useCanvasEvents() {
 
     if (resizeMode.isResizing()) {
       resizeMode.updateResize(worldPoint);
+      return;
+    }
+
+    if (moveMode.isMoving()) {
+      moveMode.move(worldPoint);
       return;
     }
 

@@ -1,3 +1,4 @@
+import { ElementFactory } from "./elementFactory";
 import type { Bounds, HandleType, IElement, Point } from "./types";
 
 export function screenToWorld(
@@ -129,4 +130,44 @@ export function calculateResizeBounds(
   }
 
   return { x, y, width, height };
+}
+
+export function moveElements(
+  elements: IElement[],
+  deltaX: number,
+  deltaY: number,
+): IElement[] {
+  return elements.map((el) => {
+    const bounds = el.getBounds();
+    return ElementFactory.create(
+      el.type!,
+      bounds.x + deltaX,
+      bounds.y + deltaY,
+      bounds.width,
+      bounds.height,
+      {
+        ...el.properties,
+      },
+    );
+  });
+}
+
+export function pointInBounds(
+  point: Point,
+  bounds: Bounds,
+  zoom: number,
+): boolean {
+  const left = bounds.x;
+  const right = bounds.x + bounds.width;
+  const top = bounds.y;
+  const bottom = bounds.y + bounds.height;
+
+  const minX = Math.min(left, right);
+  const maxX = Math.max(left, right);
+  const minY = Math.min(top, bottom);
+  const maxY = Math.max(top, bottom);
+
+  return (
+    point.x >= minX && point.x <= maxX && point.y >= minY && point.y <= maxY
+  );
 }

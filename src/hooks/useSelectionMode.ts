@@ -25,8 +25,10 @@ export function useSelectionMode() {
 
   function updateSelection(worldPoint: Point) {
     if (!selectionBox) return;
+
     const { start, current } = selectionBox!;
     if (!start || !current) return;
+    
     setSelectionBox({ start, current: worldPoint });
     const minX = Math.min(start.x, current.x);
     const maxX = Math.max(start.x, current.x);

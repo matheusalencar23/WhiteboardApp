@@ -190,7 +190,7 @@ function drawGeometrySelectionBox(
 
   ctx.save();
 
-  ctx.strokeStyle = "rgb(59, 130, 246, 0.7)";
+  ctx.strokeStyle = "rgba(59, 130, 246, 0.7)";
   ctx.lineWidth = 2 / zoom;
 
   const padding = 4 / zoom;
