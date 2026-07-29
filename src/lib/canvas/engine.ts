@@ -1,7 +1,7 @@
 import rough from "roughjs";
 import type { Bounds, IElement, Point } from "../geometry/types";
 import { useCanvasStore } from "../../store/useCanvasStore";
-import { getGroupBounds } from "../geometry/utils";
+import { getGroupBounds } from "../geometry/bounds";
 
 export function render(
   canvas: HTMLCanvasElement,

@@ -1,12 +1,9 @@
 import { useRef } from "react";
 import type { Point } from "../lib/geometry/types";
-import {
-  calculateRotationAngle,
-  getGroupBounds,
-  getHandleAtPoint,
-  rotatePoint,
-} from "../lib/geometry/utils";
+import { calculateRotationAngle, rotatePoint } from "../lib/geometry/transform";
 import { useCanvasStore } from "../store/useCanvasStore";
+import { getGroupBounds } from "../lib/geometry/bounds";
+import { getHandleAtPoint } from "../lib/geometry/handles";
 
 export function useRotationMode() {
   const initialMouseAngle = useRef<number>(0);

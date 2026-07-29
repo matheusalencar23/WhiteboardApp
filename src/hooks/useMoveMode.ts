@@ -1,10 +1,7 @@
 import { useRef } from "react";
 import type { Point } from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
-import {
-  getGroupBounds,
-  pointInBounds,
-} from "../lib/geometry/utils";
+import { getGroupBounds, pointInBounds } from "../lib/geometry/bounds";
 
 export function useMoveMode() {
   const isDraggingElements = useRef<boolean>(false);
@@ -51,7 +48,9 @@ export function useMoveMode() {
     const deltaX = worldPoint.x - lastMouseWorldPoint.current.x;
     const deltaY = worldPoint.y - lastMouseWorldPoint.current.y;
 
-    const movedElements = selectedElements().map((el) => el.clone({ x: el.x + deltaX, y: el.y + deltaY })) 
+    const movedElements = selectedElements().map((el) =>
+      el.clone({ x: el.x + deltaX, y: el.y + deltaY }),
+    );
     movedElements.forEach((el) => updateElement(el.id, el));
 
     lastMouseWorldPoint.current = worldPoint;

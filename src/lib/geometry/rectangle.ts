@@ -1,7 +1,7 @@
 import type { RoughCanvas } from "roughjs/bin/canvas";
 import type { Bounds, IElement, Point, Properties } from "./types";
 import { Element } from "./element";
-import { rotatePoint } from "./utils";
+import { rotatePoint } from "./transform";
 
 export class Rectangle extends Element {
   private _fill: string;

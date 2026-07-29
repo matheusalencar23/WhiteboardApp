@@ -1,10 +1,10 @@
 import { useCanvasStore } from "../store/useCanvasStore";
-import { screenToWorld } from "../lib/geometry/utils";
 import { useResizeMode } from "./useResizeMode";
 import { useSelectionMode } from "./useSelectionMode";
 import { useDrawMode } from "./useDrawMode";
 import { useMoveMode } from "./useMoveMode";
 import { useRotationMode } from "./useRotationMode";
+import { screenToWorld } from "../lib/geometry/coordinates";
 
 export function useCanvasEvents() {
   const resizeMode = useResizeMode();

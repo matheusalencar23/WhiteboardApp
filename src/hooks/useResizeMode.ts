@@ -1,11 +1,11 @@
 import type { Point } from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
+import { getGroupBounds } from "../lib/geometry/bounds";
 import {
-  calculateResize,
-  calculateResizeBounds,
-  getGroupBounds,
+  calculateAxisAlignedResizeBounds,
   getHandleAtPoint,
-} from "../lib/geometry/utils";
+} from "../lib/geometry/handles";
+import { calculateRotatedResize } from "../lib/geometry/resize";
 
 export function useResizeMode() {
   const {
@@ -82,13 +82,13 @@ export function useResizeMode() {
 
     if (initialElementsSnapshot.length === 1) {
       const el = initialElementsSnapshot[0];
-      const newBounds = calculateResize(el, activeHandle, worldPoint);
+      const newBounds = calculateRotatedResize(el, activeHandle, worldPoint);
       const updatedEl = el.clone({ ...newBounds });
       updateElement(el.id, updatedEl);
       return;
     }
 
-    const newGroupBounds = calculateResizeBounds(
+    const newGroupBounds = calculateAxisAlignedResizeBounds(
       initialGroupBounds,
       activeHandle,
       worldPoint,

@@ -3,8 +3,8 @@ import "./style.css";
 import { useCanvasStore } from "../../store/useCanvasStore";
 import { render } from "../../lib/canvas/engine";
 import { useCanvasEvents } from "../../hooks/useCanvasEvents";
-import { screenToWorld } from "../../lib/geometry/utils";
 import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
+import { screenToWorld } from "../../lib/geometry/coordinates";
 
 export function Canvas() {
   useKeyboardShortcuts();
