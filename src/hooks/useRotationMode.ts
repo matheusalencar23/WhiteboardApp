@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import { ElementFactory } from "../lib/geometry/elementFactory";
 import type { Point } from "../lib/geometry/types";
 import {
   calculateRotationAngle,
@@ -14,7 +13,7 @@ export function useRotationMode() {
   const initialElementAngles = useRef<Map<string, number>>(new Map());
 
   const {
-    elements,
+    elements: allElements,
     updateElement,
     zoom,
     selectedElementIds,
@@ -27,28 +26,27 @@ export function useRotationMode() {
   } = useCanvasStore();
 
   function selectedElements() {
-    return elements.filter((el) => selectedElementIds.includes(el.id));
+    return allElements.filter((el) => selectedElementIds.includes(el.id));
+  }
+
+  function getSelectedElementsBound() {
+    return selectedElements().length === 1
+      ? selectedElements()[0].getLocalBounds()
+      : getGroupBounds(selectedElements());
+  }
+
+  function getSelectedElementsAngle() {
+    return selectedElements().length === 1 ? selectedElements()[0].angle : 0;
   }
 
   function tryStartRotation(worldPoint: Point): boolean {
     if (selectedElements().length === 0) return false;
 
-    const elements = selectedElements();
-    let bounds;
-    if (elements.length === 1) {
-      bounds = elements[0].getLocalBounds();
-    } else {
-      bounds = getGroupBounds(selectedElements());
-    }
-
+    const bounds = getSelectedElementsBound();
     if (!bounds) return false;
 
-    const handle = getHandleAtPoint(
-      worldPoint,
-      bounds,
-      zoom,
-      elements.length === 1 ? elements[0].angle : 0,
-    );
+    const angle = getSelectedElementsAngle();
+    const handle = getHandleAtPoint(worldPoint, bounds, zoom, angle);
     if (!handle || handle !== "rotation") return false;
 
     setActiveHandle(handle);
@@ -104,21 +102,11 @@ export function useRotationMode() {
       };
 
       const newCenter = rotatePoint(origCenter, groupCenter, deltaAngle);
-      const newX = newCenter.x - el.width / 2;
-      const newY = newCenter.y - el.height / 2;
+      const x = newCenter.x - el.width / 2;
+      const y = newCenter.y - el.height / 2;
 
-      const updated = ElementFactory.create(
-        el.type!,
-        newX,
-        newY,
-        el.width,
-        el.height,
-        {
-          ...el.properties,
-          angle: newAngle,
-        },
-      );
-      updateElement(el.id, updated);
+      const updatedEl = el.clone({ x, y, angle: newAngle });
+      updateElement(el.id, updatedEl);
     });
     return;
   }

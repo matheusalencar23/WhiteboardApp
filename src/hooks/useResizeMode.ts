@@ -1,15 +1,15 @@
-import type { IElement, Point } from "../lib/geometry/types";
+import type { Point } from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
 import {
+  calculateResize,
   calculateResizeBounds,
   getGroupBounds,
   getHandleAtPoint,
 } from "../lib/geometry/utils";
-import { ElementFactory } from "../lib/geometry/elementFactory";
 
 export function useResizeMode() {
   const {
-    elements,
+    elements: allElements,
     updateElement,
     zoom,
     selectedElementIds,
@@ -24,28 +24,27 @@ export function useResizeMode() {
   } = useCanvasStore();
 
   function selectedElements() {
-    return elements.filter((el) => selectedElementIds.includes(el.id));
+    return allElements.filter((el) => selectedElementIds.includes(el.id));
+  }
+
+  function getSelectedElementsBound() {
+    return selectedElements().length === 1
+      ? selectedElements()[0].getLocalBounds()
+      : getGroupBounds(selectedElements());
+  }
+
+  function getSelectedElementsAngle() {
+    return selectedElements().length === 1 ? selectedElements()[0].angle : 0;
   }
 
   function tryStartResize(worldPoint: Point): boolean {
     if (selectedElements().length === 0) return false;
 
-    const elements = selectedElements();
-    let bounds;
-    if (elements.length === 1) {
-      bounds = elements[0].getLocalBounds();
-    } else {
-      bounds = getGroupBounds(selectedElements());
-    }
-
+    const bounds = getSelectedElementsBound();
     if (!bounds) return false;
 
-    const handle = getHandleAtPoint(
-      worldPoint,
-      bounds,
-      zoom,
-      elements.length === 1 ? elements[0].angle : 0,
-    );
+    const angle = getSelectedElementsAngle();
+    const handle = getHandleAtPoint(worldPoint, bounds, zoom, angle);
     if (!handle || handle === "rotation") return false;
 
     setCursor("grabbing");
@@ -58,46 +57,35 @@ export function useResizeMode() {
   function updateHoverCursor(worldPoint: Point) {
     if (activeHandle || selectedElements().length === 0) return;
 
-    const elements = selectedElements();
-    let bounds;
-    if (elements.length === 1) {
-      bounds = elements[0].getLocalBounds();
-    } else {
-      bounds = getGroupBounds(selectedElements());
-    }
-
+    const bounds = getSelectedElementsBound();
     if (!bounds) return false;
 
-    const handle = getHandleAtPoint(
-      worldPoint,
-      bounds,
-      zoom,
-      elements.length === 1 ? elements[0].angle : 0,
-    );
+    const angle = getSelectedElementsAngle();
+    const handle = getHandleAtPoint(worldPoint, bounds, zoom, angle);
+
     if (handle) {
       setCursor("grab");
-    } else {
-      clearCursor();
+      return;
     }
+
+    clearCursor();
   }
 
-  function resize(worldPoint: Point): boolean {
+  function resize(worldPoint: Point) {
     if (
       !activeHandle ||
       !initialGroupBounds ||
       initialElementsSnapshot.length === 0
     ) {
-      return false;
+      return;
     }
 
     if (initialElementsSnapshot.length === 1) {
-      const initialEl = initialElementsSnapshot[0];
-      const angle = initialEl.angle || 0;
-
-      if (angle !== 0) {
-        resizeElement(initialEl, activeHandle, worldPoint);
-        return true;
-      }
+      const el = initialElementsSnapshot[0];
+      const newBounds = calculateResize(el, activeHandle, worldPoint);
+      const updatedEl = el.clone({ ...newBounds });
+      updateElement(el.id, updatedEl);
+      return;
     }
 
     const newGroupBounds = calculateResizeBounds(
@@ -106,36 +94,23 @@ export function useResizeMode() {
       worldPoint,
     );
 
-    const initialWidth = initialGroupBounds.width || 1;
-    const initialHeight = initialGroupBounds.height || 1;
+    const scaleX = newGroupBounds.width / (initialGroupBounds.width || 1);
+    const scaleY = newGroupBounds.height / (initialGroupBounds.height || 1);
 
-    initialElementsSnapshot.forEach((selectedEl) => {
-      const bounds = selectedEl.getBounds();
+    initialElementsSnapshot.forEach((el) => {
+      const bounds = el.getLocalBounds();
 
-      const relX = (bounds.x - initialGroupBounds!.x) / initialWidth;
-      const relY = (bounds.y - initialGroupBounds!.y) / initialHeight;
-      const relWidth = bounds.width / initialWidth;
-      const relHeight = bounds.height / initialHeight;
+      const relX = bounds.x - initialGroupBounds.x;
+      const relY = bounds.y - initialGroupBounds.y;
 
-      const newX = newGroupBounds.x + relX * newGroupBounds.width;
-      const newY = newGroupBounds.y + relY * newGroupBounds.height;
-      const newW = relWidth * newGroupBounds.width;
-      const newH = relHeight * newGroupBounds.height;
+      const x = newGroupBounds.x + relX * scaleX;
+      const y = newGroupBounds.y + relY * scaleY;
+      const width = bounds.width * scaleX;
+      const height = bounds.height * scaleY;
 
-      const id = selectedEl.id;
-      const el = ElementFactory.create(
-        selectedEl.type!,
-        newX,
-        newY,
-        newW,
-        newH,
-        { ...selectedEl.properties },
-      );
-
-      updateElement(id, el);
+      const updatedEl = el.clone({ x, y, width, height });
+      updateElement(el.id, updatedEl);
     });
-
-    return true;
   }
 
   function stopResize() {
@@ -148,81 +123,11 @@ export function useResizeMode() {
     return !!activeHandle && activeHandle !== "rotation";
   }
 
-  function resizeElement(initialEl: IElement, handle: string, mouse: Point) {
-    const rad = ((initialEl.angle || 0) * Math.PI) / 180;
-    const cos = Math.cos(rad);
-    const sin = Math.sin(rad);
-
-    // Vetores diretores dos eixos locais X e Y do elemento
-    const uX = { x: cos, y: sin };
-    const uY = { x: -sin, y: cos };
-
-    // Centro da caixa antes de ser redimensionada
-    const cx0 = initialEl.x + initialEl.width / 2;
-    const cy0 = initialEl.y + initialEl.height / 2;
-
-    // Distância do mouse até o centro antigo
-    const dx = mouse.x - cx0;
-    const dy = mouse.y - cy0;
-
-    // Projeta a posição do mouse sobre os eixos locais do elemento
-    const projX = dx * uX.x + dy * uX.y;
-    const projY = dx * uY.x + dy * uY.y;
-
-    let localW = initialEl.width;
-    let localH = initialEl.height;
-    let shiftX = 0;
-    let shiftY = 0;
-
-    const halfW = initialEl.width / 2;
-    const halfH = initialEl.height / 2;
-
-    // Ajusta o width e empurra o centro para manter o lado oposto ancorado
-    if (handle.includes("e")) {
-      localW = Math.max(5, projX + halfW);
-      shiftX = (localW - initialEl.width) / 2;
-    } else if (handle.includes("w")) {
-      localW = Math.max(5, halfW - projX);
-      shiftX = -(localW - initialEl.width) / 2;
-    }
-
-    // Ajusta o height e empurra o centro
-    if (handle.includes("s")) {
-      localH = Math.max(5, projY + halfH);
-      shiftY = (localH - initialEl.height) / 2;
-    } else if (handle.includes("n")) {
-      localH = Math.max(5, halfH - projY);
-      shiftY = -(localH - initialEl.height) / 2;
-    }
-
-    // Calcula onde vai ficar o novo centro global usando os eixos projetados
-    const newCx = cx0 + shiftX * uX.x + shiftY * uY.x;
-    const newCy = cy0 + shiftX * uX.y + shiftY * uY.y;
-
-    // Decompõe o centro de volta para as coordenadas x, y (top-left local)
-    const newX = newCx - localW / 2;
-    const newY = newCy - localH / 2;
-
-    const el = ElementFactory.create(
-      initialEl.type!,
-      newX,
-      newY,
-      localW,
-      localH,
-      {
-        ...initialEl.properties,
-        angle: initialEl.angle || 0,
-      },
-    );
-
-    updateElement(initialEl.id, el);
-  }
-
   return {
     isResizing,
     tryStartResize,
     updateHoverCursor,
-    updateResize: resize,
+    resize,
     stopResize,
   };
 }

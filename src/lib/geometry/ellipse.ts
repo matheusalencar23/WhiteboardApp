@@ -1,10 +1,18 @@
 import type { RoughCanvas } from "roughjs/bin/canvas";
-import type { Bounds, Point, Properties } from "./types";
+import type { Bounds, IElement, Point, Properties } from "./types";
 import { Element } from "./element";
 
 export class Ellipse extends Element {
-  private _fill;
-  private _fillStyle;
+  private _fill: string;
+  private _fillStyle: string;
+
+  get properties() {
+    return {
+      ...super.properties,
+      fill: this._fill,
+      fillStyle: this._fillStyle,
+    };
+  }
 
   constructor(
     x: number,
@@ -15,7 +23,7 @@ export class Ellipse extends Element {
   ) {
     super(x, y, width, height, properties);
     this._type = "ellipse";
-    this._fill = properties.fill || null;
+    this._fill = properties.fill || "";
     this._fillStyle = properties.fillStyle || "hachure";
   }
 
@@ -102,5 +110,15 @@ export class Ellipse extends Element {
       width: this.width,
       height: this.height,
     };
+  }
+
+  clone(overrides: Partial<Bounds & Properties> = {}): IElement {
+    return new Ellipse(
+      overrides.x ?? this.x,
+      overrides.y ?? this.y,
+      overrides.width ?? this.width,
+      overrides.height ?? this.height,
+      { ...this.properties, ...overrides },
+    );
   }
 }

@@ -16,20 +16,24 @@ export function useCanvasEvents() {
   const { activeTool, zoom, pan, setSelectionBox, clearCursor } =
     useCanvasStore();
 
-  function handlePointerDown(event: React.PointerEvent) {
-    const worldPoint = screenToWorld(
+  function worldPointFromPointerEvent(event: React.PointerEvent) {
+    return screenToWorld(
       event.nativeEvent.offsetX,
       event.nativeEvent.offsetY,
       zoom,
       pan,
     );
+  }
+
+  function handlePointerDown(event: React.PointerEvent) {
+    const worldPoint = worldPointFromPointerEvent(event);
 
     if (activeTool === "selection") {
-      const hitHandle = resizeMode.tryStartResize(worldPoint);
+      const hitResizeHandle = resizeMode.tryStartResize(worldPoint);
       const hitRotationHandle = rotationMode.tryStartRotation(worldPoint);
       const hitSelection = moveMode.tryStartMoving(worldPoint);
 
-      if (!hitHandle && !hitSelection && !hitRotationHandle) {
+      if (!hitResizeHandle && !hitSelection && !hitRotationHandle) {
         selectionMode.startSelection(worldPoint);
       }
 
@@ -49,17 +53,12 @@ export function useCanvasEvents() {
   }
 
   function handlePointerMove(event: React.PointerEvent) {
-    const worldPoint = screenToWorld(
-      event.nativeEvent.offsetX,
-      event.nativeEvent.offsetY,
-      zoom,
-      pan,
-    );
+    const worldPoint = worldPointFromPointerEvent(event);
 
     resizeMode.updateHoverCursor(worldPoint);
 
     if (resizeMode.isResizing()) {
-      resizeMode.updateResize(worldPoint);
+      resizeMode.resize(worldPoint);
       return;
     }
 

@@ -3,7 +3,7 @@ import type { RoughCanvas } from "roughjs/bin/canvas";
 import type { Bounds, IElement, Point, Properties } from "./types";
 import type { Tool } from "../canvas/types";
 
-export class Element implements IElement {
+export abstract class Element implements IElement {
   protected _id: string;
   protected _type: Exclude<Tool, "selection"> | null;
   protected _x: number;
@@ -68,6 +68,10 @@ export class Element implements IElement {
   get properties() {
     return {
       id: this._id,
+      stroke: this._stroke,
+      strokeWidth: this._strokeWidth,
+      roughness: this._roughness,
+      bowing: this._bowing,
       seed: this._seed,
       angle: this._angle,
     };
@@ -94,21 +98,9 @@ export class Element implements IElement {
     this._angle = properties.angle || 0;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  draw(_rc: RoughCanvas, _ctx: CanvasRenderingContext2D) {
-    throw new Error("Method draw() needs to be implemented!");
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  containsPoint(_point: Point): boolean {
-    throw new Error("Method containsPoint() needs to be implemented!");
-  }
-
-  getBounds(): Bounds {
-    throw new Error("Method getBounds() needs to be implemented!");
-  }
-
-  getLocalBounds(): Bounds {
-    throw new Error("Method getLocalBounds() needs to be implemented!");
-  }
+  abstract draw(_rc: RoughCanvas, _ctx: CanvasRenderingContext2D): void;
+  abstract containsPoint(_point: Point): boolean;
+  abstract getBounds(): Bounds;
+  abstract getLocalBounds(): Bounds;
+  abstract clone(overrides: Partial<Bounds & Properties>): IElement;
 }

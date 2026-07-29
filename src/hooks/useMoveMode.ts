@@ -3,7 +3,6 @@ import type { Point } from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
 import {
   getGroupBounds,
-  moveElements,
   pointInBounds,
 } from "../lib/geometry/utils";
 
@@ -11,11 +10,15 @@ export function useMoveMode() {
   const isDraggingElements = useRef<boolean>(false);
   const lastMouseWorldPoint = useRef<Point | null>(null);
 
-  const { elements, selectedElementIds, setCursor, updateElement } =
-    useCanvasStore();
+  const {
+    elements: allElements,
+    selectedElementIds,
+    setCursor,
+    updateElement,
+  } = useCanvasStore();
 
   function selectedElements() {
-    return elements.filter((el) => selectedElementIds.includes(el.id));
+    return allElements.filter((el) => selectedElementIds.includes(el.id));
   }
 
   function tryStartMoving(worldPoint: Point): boolean {
@@ -48,7 +51,7 @@ export function useMoveMode() {
     const deltaX = worldPoint.x - lastMouseWorldPoint.current.x;
     const deltaY = worldPoint.y - lastMouseWorldPoint.current.y;
 
-    const movedElements = moveElements(selectedElements(), deltaX, deltaY);
+    const movedElements = selectedElements().map((el) => el.clone({ x: el.x + deltaX, y: el.y + deltaY })) 
     movedElements.forEach((el) => updateElement(el.id, el));
 
     lastMouseWorldPoint.current = worldPoint;

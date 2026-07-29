@@ -55,4 +55,5 @@ export interface IElement {
   containsPoint(point: Point): boolean;
   getBounds(): Bounds;
   getLocalBounds(): Bounds;
+  clone(overrides: Partial<Bounds & Properties>): IElement;
 }

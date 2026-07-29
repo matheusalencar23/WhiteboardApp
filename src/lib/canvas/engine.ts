@@ -257,7 +257,7 @@ function drawGeometrySelectionBox(
   const rotationY = topCenterY - rotationOffset;
 
   ctx.beginPath();
-  ctx.moveTo(topCenterX, topCenterY);
+  ctx.moveTo(topCenterX, topCenterY - halfHandle);
   ctx.lineTo(topCenterX, rotationY);
   ctx.stroke();
 
