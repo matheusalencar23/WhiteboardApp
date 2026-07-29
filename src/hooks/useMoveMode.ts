@@ -1,28 +1,19 @@
 import { useRef } from "react";
 import type { Point } from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
-import { getGroupBounds, pointInBounds } from "../lib/geometry/bounds";
+import { pointInBounds } from "../lib/geometry/bounds";
+import { useSelectedElements } from "./useSelectedElements";
 
 export function useMoveMode() {
   const isDraggingElements = useRef<boolean>(false);
   const lastMouseWorldPoint = useRef<Point | null>(null);
 
-  const {
-    elements: allElements,
-    selectedElementIds,
-    setCursor,
-    updateElement,
-  } = useCanvasStore();
+  const { setCursor, updateElement } = useCanvasStore();
 
-  function selectedElements() {
-    return allElements.filter((el) => selectedElementIds.includes(el.id));
-  }
+  const { selected, bounds } = useSelectedElements();
 
   function tryStartMoving(worldPoint: Point): boolean {
-    if (selectedElements().length === 0) return false;
-
-    const bounds = getGroupBounds(selectedElements());
-    if (!bounds) return false;
+    if (selected.length === 0 || !bounds) return false;
 
     const clickedOnSelected = pointInBounds(worldPoint, bounds);
     if (!clickedOnSelected) return false;
@@ -42,13 +33,13 @@ export function useMoveMode() {
     return !!isDraggingElements.current && !!lastMouseWorldPoint.current;
   }
 
-  function move(worldPoint: Point) {
+  function applyMove(worldPoint: Point) {
     if (!lastMouseWorldPoint.current) return;
 
     const deltaX = worldPoint.x - lastMouseWorldPoint.current.x;
     const deltaY = worldPoint.y - lastMouseWorldPoint.current.y;
 
-    const movedElements = selectedElements().map((el) =>
+    const movedElements = selected.map((el) =>
       el.clone({ x: el.x + deltaX, y: el.y + deltaY }),
     );
     movedElements.forEach((el) => updateElement(el.id, el));
@@ -57,5 +48,5 @@ export function useMoveMode() {
     return;
   }
 
-  return { tryStartMoving, stopMoving, isMoving, move };
+  return { tryStartMoving, stopMoving, isMoving, applyMove };
 }

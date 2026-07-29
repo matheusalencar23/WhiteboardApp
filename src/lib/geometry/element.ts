@@ -1,11 +1,11 @@
 import { nanoid } from "nanoid";
 import type { RoughCanvas } from "roughjs/bin/canvas";
 import type { Bounds, IElement, Point, Properties } from "./types";
-import type { Tool } from "../canvas/types";
+import type { DrawingTool } from "../canvas/types";
 
 export abstract class Element implements IElement {
   protected _id: string;
-  protected _type: Exclude<Tool, "selection"> | null;
+  protected _type: DrawingTool | null;
   protected _x: number;
   protected _y: number;
   protected _width: number;

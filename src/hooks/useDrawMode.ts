@@ -23,8 +23,15 @@ export function useDrawMode() {
     elementDrawnId.current = null;
   }
 
-  function updateDrawing(worldPoint: Point) {
-    if (!initialPointDraw.current || !elementDrawnId.current) return;
+  function applyDrawing(worldPoint: Point) {
+    if (
+      !activeTool ||
+      activeTool === "selection" ||
+      !initialPointDraw.current ||
+      !elementDrawnId.current
+    ) {
+      return;
+    }
 
     const startX = initialPointDraw.current.x;
     const startY = initialPointDraw.current.y;
@@ -35,7 +42,7 @@ export function useDrawMode() {
     );
 
     const el = ElementFactory.create(
-      activeTool!,
+      activeTool,
       startX,
       startY,
       width,
@@ -46,5 +53,5 @@ export function useDrawMode() {
     updateElement(elementDrawnId.current, el);
   }
 
-  return { startDrawing, stopDrawing, updateDrawing };
+  return { startDrawing, stopDrawing, applyDrawing };
 }

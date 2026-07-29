@@ -58,17 +58,17 @@ export function useCanvasEvents() {
     resizeMode.updateHoverCursor(worldPoint);
 
     if (resizeMode.isResizing()) {
-      resizeMode.resize(worldPoint);
+      resizeMode.applyResize(worldPoint);
       return;
     }
 
     if (rotationMode.isRotating()) {
-      rotationMode.rotate(worldPoint);
+      rotationMode.applyRotation(worldPoint);
       return;
     }
 
     if (moveMode.isMoving()) {
-      moveMode.move(worldPoint);
+      moveMode.applyMove(worldPoint);
       return;
     }
 
@@ -77,7 +77,7 @@ export function useCanvasEvents() {
       return;
     }
 
-    drawMode.updateDrawing(worldPoint);
+    drawMode.applyDrawing(worldPoint);
   }
 
   return { handlePointerDown, handlePointerMove, handlePointerUp };

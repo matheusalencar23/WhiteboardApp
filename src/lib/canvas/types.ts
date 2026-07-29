@@ -1,1 +1,2 @@
-export type Tool = "selection" | "rectangle" | "ellipse";
+export type DrawingTool = "rectangle" | "ellipse";
+export type Tool = DrawingTool | "selection";

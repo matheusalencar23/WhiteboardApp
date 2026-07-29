@@ -2,18 +2,16 @@ import { useRef } from "react";
 import type { Point } from "../lib/geometry/types";
 import { calculateRotationAngle, rotatePoint } from "../lib/geometry/transform";
 import { useCanvasStore } from "../store/useCanvasStore";
-import { getGroupBounds } from "../lib/geometry/bounds";
 import { getHandleAtPoint } from "../lib/geometry/handles";
+import { useSelectedElements } from "./useSelectedElements";
 
 export function useRotationMode() {
   const initialMouseAngle = useRef<number>(0);
   const initialElementAngles = useRef<Map<string, number>>(new Map());
 
   const {
-    elements: allElements,
     updateElement,
     zoom,
-    selectedElementIds,
     activeHandle,
     setActiveHandle,
     initialGroupBounds,
@@ -22,33 +20,17 @@ export function useRotationMode() {
     setInitialElementsSnapshot,
   } = useCanvasStore();
 
-  function selectedElements() {
-    return allElements.filter((el) => selectedElementIds.includes(el.id));
-  }
-
-  function getSelectedElementsBound() {
-    return selectedElements().length === 1
-      ? selectedElements()[0].getLocalBounds()
-      : getGroupBounds(selectedElements());
-  }
-
-  function getSelectedElementsAngle() {
-    return selectedElements().length === 1 ? selectedElements()[0].angle : 0;
-  }
+  const { selected, angle, bounds } = useSelectedElements();
 
   function tryStartRotation(worldPoint: Point): boolean {
-    if (selectedElements().length === 0) return false;
+    if (selected.length === 0 || !bounds) return false;
 
-    const bounds = getSelectedElementsBound();
-    if (!bounds) return false;
-
-    const angle = getSelectedElementsAngle();
     const handle = getHandleAtPoint(worldPoint, bounds, zoom, angle);
     if (!handle || handle !== "rotation") return false;
 
     setActiveHandle(handle);
     setInitialGroupBounds(bounds);
-    setInitialElementsSnapshot([...selectedElements()]);
+    setInitialElementsSnapshot([...selected]);
 
     const groupCenter: Point = {
       x: bounds.x + bounds.width / 2,
@@ -57,7 +39,7 @@ export function useRotationMode() {
 
     initialMouseAngle.current = calculateRotationAngle(groupCenter, worldPoint);
 
-    selectedElements().forEach((el) => {
+    selected.forEach((el) => {
       initialElementAngles.current.set(el.id, el.angle || 0);
     });
 
@@ -74,7 +56,7 @@ export function useRotationMode() {
     return !!activeHandle && activeHandle === "rotation";
   }
 
-  function rotate(worldPoint: Point) {
+  function applyRotation(worldPoint: Point) {
     const bounds = initialGroupBounds;
     if (!bounds) return;
 
@@ -108,5 +90,5 @@ export function useRotationMode() {
     return;
   }
 
-  return { tryStartRotation, stopRotation, isRotating, rotate };
+  return { tryStartRotation, stopRotation, isRotating, applyRotation };
 }

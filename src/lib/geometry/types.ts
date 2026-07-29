@@ -1,5 +1,5 @@
 import type { RoughCanvas } from "roughjs/bin/canvas";
-import type { Tool } from "../canvas/types";
+import type { DrawingTool } from "../canvas/types";
 
 export interface Point {
   x: number;
@@ -38,7 +38,7 @@ export type HandleType =
 
 export interface IElement {
   id: string;
-  type: Exclude<Tool, "selection"> | null;
+  type: DrawingTool | null;
   stroke: string;
   strokeWidth: number;
   roughness: number;
