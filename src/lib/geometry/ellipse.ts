@@ -3,8 +3,6 @@ import type { Bounds, Point, Properties } from "./types";
 import { Element } from "./element";
 
 export class Ellipse extends Element {
-  private _width;
-  private _height;
   private _fill;
   private _fillStyle;
 
@@ -15,10 +13,8 @@ export class Ellipse extends Element {
     height: number,
     properties: Properties = {},
   ) {
-    super(x, y, properties);
+    super(x, y, width, height, properties);
     this._type = "ellipse";
-    this._width = width;
-    this._height = height;
     this._fill = properties.fill || null;
     this._fillStyle = properties.fillStyle || "hachure";
   }
@@ -96,6 +92,15 @@ export class Ellipse extends Element {
       y: cy - halfHeight,
       width: halfWidth * 2,
       height: halfHeight * 2,
+    };
+  }
+
+  getLocalBounds(): Bounds {
+    return {
+      x: this.x,
+      y: this.y,
+      width: this.width,
+      height: this.height,
     };
   }
 }

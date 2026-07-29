@@ -1,13 +1,18 @@
+import { useRef } from "react";
 import { ElementFactory } from "../lib/geometry/elementFactory";
 import type { Point } from "../lib/geometry/types";
 import {
   calculateRotationAngle,
   getGroupBounds,
   getHandleAtPoint,
+  rotatePoint,
 } from "../lib/geometry/utils";
 import { useCanvasStore } from "../store/useCanvasStore";
 
 export function useRotationMode() {
+  const initialMouseAngle = useRef<number>(0);
+  const initialElementAngles = useRef<Map<string, number>>(new Map());
+
   const {
     elements,
     updateElement,
@@ -28,21 +33,46 @@ export function useRotationMode() {
   function tryStartRotation(worldPoint: Point): boolean {
     if (selectedElements().length === 0) return false;
 
-    const bounds = getGroupBounds(selectedElements());
+    const elements = selectedElements();
+    let bounds;
+    if (elements.length === 1) {
+      bounds = elements[0].getLocalBounds();
+    } else {
+      bounds = getGroupBounds(selectedElements());
+    }
+
     if (!bounds) return false;
 
-    const handle = getHandleAtPoint(worldPoint, bounds, zoom);
+    const handle = getHandleAtPoint(
+      worldPoint,
+      bounds,
+      zoom,
+      elements.length === 1 ? elements[0].angle : 0,
+    );
     if (!handle || handle !== "rotation") return false;
 
     setActiveHandle(handle);
     setInitialGroupBounds(bounds);
-    setInitialElementsSnapshot([...selectedElements()])
+    setInitialElementsSnapshot([...selectedElements()]);
+
+    const groupCenter: Point = {
+      x: bounds.x + bounds.width / 2,
+      y: bounds.y + bounds.height / 2,
+    };
+
+    initialMouseAngle.current = calculateRotationAngle(groupCenter, worldPoint);
+
+    selectedElements().forEach((el) => {
+      initialElementAngles.current.set(el.id, el.angle || 0);
+    });
 
     return true;
   }
 
   function stopRotation() {
     setActiveHandle(null);
+    setInitialGroupBounds(null);
+    setInitialElementsSnapshot([]);
   }
 
   function isRotating() {
@@ -58,24 +88,34 @@ export function useRotationMode() {
       y: bounds.y + bounds.height / 2,
     };
 
-    const newAngle = calculateRotationAngle(groupCenter, worldPoint);
+    const newMouseAngle = calculateRotationAngle(groupCenter, worldPoint);
+
+    const deltaAngle = newMouseAngle - initialMouseAngle.current;
 
     initialElementsSnapshot.forEach((el) => {
-      const bounds = el.getBounds();
+      const startAngle = initialElementAngles.current.get(el.id) || 0;
+
+      let newAngle = (startAngle + deltaAngle) % 360;
+      if (newAngle < 0) newAngle += 360;
+
+      const origCenter: Point = {
+        x: el.x + el.width / 2,
+        y: el.y + el.height / 2,
+      };
+
+      const newCenter = rotatePoint(origCenter, groupCenter, deltaAngle);
+      const newX = newCenter.x - el.width / 2;
+      const newY = newCenter.y - el.height / 2;
+
       const updated = ElementFactory.create(
         el.type!,
-        bounds.x,
-        bounds.y,
-        bounds.width,
-        bounds.height,
+        newX,
+        newY,
+        el.width,
+        el.height,
         {
-          id: el.id,
-          seed: el.seed,
+          ...el.properties,
           angle: newAngle,
-          stroke: el.stroke,
-          strokeWidth: el.strokeWidth,
-          roughness: el.roughness,
-          bowing: el.bowing,
         },
       );
       updateElement(el.id, updated);

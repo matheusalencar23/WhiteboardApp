@@ -1,11 +1,9 @@
 import type { RoughCanvas } from "roughjs/bin/canvas";
-import type { Point, Properties } from "./types";
+import type { Bounds, Point, Properties } from "./types";
 import { Element } from "./element";
 import { rotatePoint } from "./utils";
 
 export class Rectangle extends Element {
-  private _width;
-  private _height;
   private _fill;
   private _fillStyle;
 
@@ -16,10 +14,8 @@ export class Rectangle extends Element {
     height: number,
     properties: Properties = {},
   ) {
-    super(x, y, properties);
+    super(x, y, width, height, properties);
     this._type = "rectangle";
-    this._width = width;
-    this._height = height;
     this._fill = properties.fill || null;
     this._fillStyle = properties.fillStyle || "hachure";
   }
@@ -65,7 +61,7 @@ export class Rectangle extends Element {
     );
   }
 
-  getBounds(): { x: number; y: number; width: number; height: number } {
+  getBounds(): Bounds {
     if (this._angle === 0) {
       return {
         x: this._x,
@@ -103,6 +99,15 @@ export class Rectangle extends Element {
       y: minY,
       width: maxX - minX,
       height: maxY - minY,
+    };
+  }
+
+  getLocalBounds(): Bounds {
+    return {
+      x: this.x,
+      y: this.y,
+      width: this.width,
+      height: this.height,
     };
   }
 }

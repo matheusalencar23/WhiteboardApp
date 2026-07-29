@@ -46,8 +46,13 @@ export interface IElement {
   seed: number;
   angle: number;
   properties: Properties;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 
   draw(_rc: RoughCanvas, _ctx: CanvasRenderingContext2D): void;
   containsPoint(point: Point): boolean;
   getBounds(): Bounds;
+  getLocalBounds(): Bounds;
 }

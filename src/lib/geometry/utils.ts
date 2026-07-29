@@ -41,10 +41,30 @@ export function getHandleAtPoint(
   point: Point,
   bounds: Bounds,
   zoom: number,
+  angle: number = 0,
 ): HandleType | null {
   const padding = 8 / zoom;
   const handleSize = 10 / zoom;
   const halfHandle = handleSize / 2;
+
+  let testPoint = point;
+
+  if (angle !== 0) {
+    const cx = bounds.x + bounds.width / 2;
+    const cy = bounds.y + bounds.height / 2;
+
+    const rad = (-angle * Math.PI) / 180;
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+
+    const dx = point.x - cx;
+    const dy = point.y - cy;
+
+    testPoint = {
+      x: cx + (dx * cos - dy * sin),
+      y: cy + (dx * sin + dy * cos),
+    };
+  }
 
   const boxX = bounds.x - padding;
   const boxY = bounds.y - padding;
@@ -68,10 +88,10 @@ export function getHandleAtPoint(
 
   for (const [type, h] of Object.entries(handles)) {
     if (
-      point.x >= h.x - halfHandle &&
-      point.x <= h.x + halfHandle &&
-      point.y >= h.y - halfHandle &&
-      point.y <= h.y + halfHandle
+      testPoint.x >= h.x - halfHandle &&
+      testPoint.x <= h.x + halfHandle &&
+      testPoint.y >= h.y - halfHandle &&
+      testPoint.y <= h.y + halfHandle
     ) {
       return type as HandleType;
     }
@@ -136,17 +156,14 @@ export function moveElements(
   deltaY: number,
 ): IElement[] {
   return elements.map((el) => {
-    const bounds = el.getBounds();
-    return ElementFactory.create(
-      el.type!,
-      bounds.x + deltaX,
-      bounds.y + deltaY,
-      bounds.width,
-      bounds.height,
-      {
-        ...el.properties,
-      },
-    );
+    const newX = el.x + deltaX;
+    const newY = el.y + deltaY;
+    const origWidth = el.width;
+    const origHeight = el.height;
+
+    return ElementFactory.create(el.type!, newX, newY, origWidth, origHeight, {
+      ...el.properties,
+    });
   });
 }
 

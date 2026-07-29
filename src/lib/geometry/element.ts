@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import type { RoughCanvas } from "roughjs/bin/canvas";
-import type { IElement, Point, Properties } from "./types";
+import type { Bounds, IElement, Point, Properties } from "./types";
 import type { Tool } from "../canvas/types";
 
 export class Element implements IElement {
@@ -8,6 +8,8 @@ export class Element implements IElement {
   protected _type: Exclude<Tool, "selection"> | null;
   protected _x: number;
   protected _y: number;
+  protected _width: number;
+  protected _height: number;
   protected _stroke: string;
   protected _strokeWidth: number;
   protected _roughness: number;
@@ -55,6 +57,14 @@ export class Element implements IElement {
     return this._angle;
   }
 
+  get width() {
+    return this._width;
+  }
+
+  get height() {
+    return this._height;
+  }
+
   get properties() {
     return {
       id: this._id,
@@ -63,11 +73,19 @@ export class Element implements IElement {
     };
   }
 
-  constructor(x: number, y: number, properties: Properties = {}) {
+  constructor(
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    properties: Properties = {},
+  ) {
     this._id = properties.id || nanoid();
     this._type = null;
     this._x = x;
     this._y = y;
+    this._width = width;
+    this._height = height;
     this._stroke = properties.stroke || "#000000";
     this._strokeWidth = properties.strokeWidth || 2;
     this._roughness = properties.roughness || 1.5;
@@ -86,7 +104,11 @@ export class Element implements IElement {
     throw new Error("Method containsPoint() needs to be implemented!");
   }
 
-  getBounds(): { x: number; y: number; width: number; height: number } {
+  getBounds(): Bounds {
     throw new Error("Method getBounds() needs to be implemented!");
+  }
+
+  getLocalBounds(): Bounds {
+    throw new Error("Method getLocalBounds() needs to be implemented!");
   }
 }
