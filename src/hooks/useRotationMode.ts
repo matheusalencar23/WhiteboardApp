@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import type { Point } from "../lib/geometry/types";
+import type { Bounds, IElement, Point } from "../lib/geometry/types";
 import { calculateRotationAngle, rotatePoint } from "../lib/geometry/transform";
 import { useCanvasStore } from "../store/useCanvasStore";
 import { getHandleAtPoint } from "../lib/geometry/handles";
@@ -8,17 +8,11 @@ import { useSelectedElements } from "./useSelectedElements";
 export function useRotationMode() {
   const initialMouseAngle = useRef<number>(0);
   const initialElementAngles = useRef<Map<string, number>>(new Map());
+  const initialGroupBounds = useRef<Bounds | null>(null);
+  const initialElementsSnapshot = useRef<IElement[]>([]);
 
-  const {
-    updateElement,
-    zoom,
-    activeHandle,
-    setActiveHandle,
-    initialGroupBounds,
-    setInitialGroupBounds,
-    initialElementsSnapshot,
-    setInitialElementsSnapshot,
-  } = useCanvasStore();
+  const { updateElement, zoom, activeHandle, setActiveHandle } =
+    useCanvasStore();
 
   const { selected, angle, bounds } = useSelectedElements();
 
@@ -29,8 +23,8 @@ export function useRotationMode() {
     if (!handle || handle !== "rotation") return false;
 
     setActiveHandle(handle);
-    setInitialGroupBounds(bounds);
-    setInitialElementsSnapshot([...selected]);
+    initialGroupBounds.current = bounds;
+    initialElementsSnapshot.current = [...selected];
 
     const groupCenter: Point = {
       x: bounds.x + bounds.width / 2,
@@ -48,8 +42,8 @@ export function useRotationMode() {
 
   function stopRotation() {
     setActiveHandle(null);
-    setInitialGroupBounds(null);
-    setInitialElementsSnapshot([]);
+    initialGroupBounds.current = null;
+    initialElementsSnapshot.current = [];
   }
 
   function isRotating() {
@@ -57,7 +51,7 @@ export function useRotationMode() {
   }
 
   function applyRotation(worldPoint: Point) {
-    const bounds = initialGroupBounds;
+    const bounds = initialGroupBounds.current;
     if (!bounds) return;
 
     const groupCenter: Point = {
@@ -69,7 +63,7 @@ export function useRotationMode() {
 
     const deltaAngle = newMouseAngle - initialMouseAngle.current;
 
-    initialElementsSnapshot.forEach((el) => {
+    initialElementsSnapshot.current.forEach((el) => {
       const startAngle = initialElementAngles.current.get(el.id) || 0;
 
       let newAngle = (startAngle + deltaAngle) % 360;
