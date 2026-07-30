@@ -1,6 +1,33 @@
 import type { Bounds, HandleType, Point } from "./types";
 import { screenPointToLocalSpace } from "./coordinates";
 
+export function getBoundsAnchorPoint(
+  bounds: Bounds,
+  handle: HandleType,
+): Point {
+  const { x, y, width, height } = bounds;
+  switch (handle) {
+    case "se":
+      return { x, y };
+    case "s":
+      return { x: x + width / 2, y };
+    case "sw":
+      return { x: x + width, y };
+    case "e":
+      return { x, y: y + height / 2 };
+    case "w":
+      return { x: x + width, y: y + height / 2 };
+    case "ne":
+      return { x, y: y + height };
+    case "n":
+      return { x: x + width / 2, y: y + height };
+    case "nw":
+      return { x: x + width, y: y + height };
+    default:
+      return { x: x + width / 2, y: y + height / 2 };
+  }
+}
+
 export function getHandleAtPoint(
   point: Point,
   bounds: Bounds,
