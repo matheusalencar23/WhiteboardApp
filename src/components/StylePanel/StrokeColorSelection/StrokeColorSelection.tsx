@@ -11,7 +11,7 @@ const STROKE_COLORS = ["#000000", "#ff0000", "#00ff00", "#0000ff"];
 export function StrokeColorSelection() {
   const { updateElement } = useCanvasStore();
   const { selected, getSelectedPropertyValue } = useSelectedElements();
-  const selectedStrokeColor = getSelectedPropertyValue("stroke") ?? "";
+  const selectedStrokeColor = getSelectedPropertyValue("stroke") ?? "transparent";
 
   const [showPicker, setShowPicker] = useState(false);
 

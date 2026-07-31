@@ -28,6 +28,7 @@ export function drawRectangle(
     fillStyle: el.fillStyle,
     bowing: el.bowing,
     seed: el.seed,
+    strokeLineDash: undefined
   });
 
   ctx.restore();

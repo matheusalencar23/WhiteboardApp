@@ -6,6 +6,7 @@ interface CanvasStore {
   elements: CanvasElement[];
   addElement: (el: CanvasElement) => void;
   updateElement: (id: string, el: CanvasElement) => void;
+  deleteElement: (id: string) => void;
 
   activeTool: Tool;
   setTool: (tool: Tool) => void;
@@ -40,6 +41,10 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
   updateElement: (id, newEl) =>
     set((state) => ({
       elements: state.elements.map((el) => (el.id === id ? newEl : el)),
+    })),
+  deleteElement: (id) =>
+    set((state) => ({
+      elements: state.elements.filter((el) => el.id !== id),
     })),
 
   activeTool: "selection",
