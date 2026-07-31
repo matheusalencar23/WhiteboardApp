@@ -1,5 +1,6 @@
 import "./App.css";
 import { Canvas } from "./components/Canvas/Canvas";
+import { StylePanel } from "./components/StylePanel/StylePanel";
 import { Toolbar } from "./components/Toolbar/Toolbar";
 
 function App() {
@@ -7,6 +8,7 @@ function App() {
     <>
       <Toolbar />
       <Canvas />
+      <StylePanel />
     </>
   );
 }
