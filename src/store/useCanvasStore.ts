@@ -1,11 +1,11 @@
 import { create } from "zustand";
-import type { HandleType, IElement, Point } from "../lib/geometry/types";
+import type { CanvasElement, HandleType, Point } from "../lib/geometry/types";
 import type { Tool } from "../lib/canvas/types";
 
 interface CanvasStore {
-  elements: IElement[];
-  addElement: (el: IElement) => void;
-  updateElement: (id: string, el: IElement) => void;
+  elements: CanvasElement[];
+  addElement: (el: CanvasElement) => void;
+  updateElement: (id: string, el: CanvasElement) => void;
 
   activeTool: Tool;
   setTool: (tool: Tool) => void;
@@ -32,12 +32,6 @@ interface CanvasStore {
 
   activeHandle: HandleType | null;
   setActiveHandle: (handle: HandleType | null) => void;
-
-  // initialGroupBounds: Bounds | null;
-  // setInitialGroupBounds: (groupBounds: Bounds | null) => void;
-
-  // initialElementsSnapshot: IElement[];
-  // setInitialElementsSnapshot: (elements: IElement[]) => void;
 }
 
 export const useCanvasStore = create<CanvasStore>((set) => ({
@@ -84,12 +78,4 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
 
   activeHandle: null,
   setActiveHandle: (handle) => set(() => ({ activeHandle: handle })),
-
-  // initialGroupBounds: null,
-  // setInitialGroupBounds: (groupBounds: Bounds | null) =>
-  //   set(() => ({ initialGroupBounds: groupBounds })),
-
-  // initialElementsSnapshot: [],
-  // setInitialElementsSnapshot: (elements: IElement[]) =>
-  //   set(() => ({ initialElementsSnapshot: elements })),
 }));

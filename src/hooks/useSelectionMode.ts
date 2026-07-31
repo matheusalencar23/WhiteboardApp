@@ -1,3 +1,7 @@
+import {
+  elementContainsPoint,
+  getElementBounds,
+} from "../lib/geometry/elementOperations";
 import type { Point } from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
 
@@ -13,7 +17,7 @@ export function useSelectionMode() {
     let clickedElementId: string | null = null;
 
     for (let i = allElements.length - 1; i >= 0; i--) {
-      if (allElements[i].containsPoint({ x: worldPoint.x, y: worldPoint.y })) {
+      if (elementContainsPoint(allElements[i], worldPoint)) {
         clickedElementId = allElements[i].id;
         break;
       }
@@ -41,7 +45,7 @@ export function useSelectionMode() {
 
     const elementsInsideIds = allElements
       .filter((el) => {
-        const { x, y, width, height } = el.getBounds();
+        const { x, y, width, height } = getElementBounds(el);
 
         return (
           x >= minX && x + width <= maxX && y >= minY && y + height <= maxY

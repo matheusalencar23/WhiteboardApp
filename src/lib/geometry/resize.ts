@@ -1,8 +1,9 @@
+import { getElementLocalBounds } from "./elementOperations";
 import {
   calculateAxisAlignedResizeBounds,
   getBoundsAnchorPoint,
 } from "./handles";
-import type { Bounds, HandleType, IElement, Point } from "./types";
+import type { Bounds, CanvasElement, HandleType, Point } from "./types";
 
 /**
  * Redimensiona UM elemento (possivelmente rotacionado), fazendo o canto/
@@ -42,7 +43,7 @@ import type { Bounds, HandleType, IElement, Point } from "./types";
  * o arraste.
  */
 export function calculateRotatedResize(
-  element: IElement,
+  element: CanvasElement,
   handle: HandleType,
   mouse: Point,
 ): Bounds {
@@ -131,7 +132,7 @@ export function calculateRotatedResize(
  * "eticar" só o eixo enquanto o grupo estiver rotacionado.
  */
 export function calculateGroupResize(
-  elements: IElement[],
+  elements: CanvasElement[],
   groupBounds: Bounds,
   handle: HandleType,
   mouseWorldPoint: Point,
@@ -154,7 +155,7 @@ export function calculateGroupResize(
   const anchor = getBoundsAnchorPoint(groupBounds, handle);
 
   return elements.map((el) => {
-    const elBounds = el.getLocalBounds();
+    const elBounds = getElementLocalBounds(el);
 
     // Posição/tamanho do elemento expressos como distância a partir do
     // anchor (o canto do grupo que fica fixo durante o gesto), depois

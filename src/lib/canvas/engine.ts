@@ -1,10 +1,14 @@
 import rough from "roughjs";
-import type { IElement, Point } from "../geometry/types";
+import type { CanvasElement, Point } from "../geometry/types";
 import { useCanvasStore } from "../../store/useCanvasStore";
 import { getGroupBounds } from "../geometry/bounds";
 import { drawGrid } from "./grid";
 import { drawSelectionHandles, drawSubSelectionBox } from "./selectionBox";
 import { drawSelectionRect } from "./selectionRect";
+import {
+  drawElement,
+  getElementLocalBounds,
+} from "../geometry/elementOperations";
 
 /**
  * Desenha o canvas inteiro do zero a cada frame (sem dirty-checking):
@@ -24,7 +28,7 @@ import { drawSelectionRect } from "./selectionRect";
  */
 export function render(
   canvas: HTMLCanvasElement,
-  elements: IElement[],
+  elements: CanvasElement[],
   zoom: number,
   pan: Point,
 ) {
@@ -51,7 +55,7 @@ export function render(
 
   const rc = rough.canvas(canvas);
 
-  elements.forEach((el) => el.draw(rc, ctx));
+  elements.forEach((el) => drawElement(el, rc, ctx));
 
   const { selectedElementIds, selectionBox } = useCanvasStore.getState();
 
@@ -65,7 +69,7 @@ export function render(
     );
 
     if (selectedElementIds.length === 1) {
-      const bounds = selectedElements[0].getLocalBounds();
+      const bounds = getElementLocalBounds(selectedElements[0]);
       const angle = selectedElements[0].angle;
       drawSelectionHandles(ctx, zoom, bounds, angle);
     } else {
@@ -76,7 +80,7 @@ export function render(
       }
 
       selectedElements.forEach((el) => {
-        const bounds = el.getLocalBounds();
+        const bounds = getElementLocalBounds(el);
         const angle = el.angle;
         drawSubSelectionBox(ctx, zoom, bounds, angle);
       });

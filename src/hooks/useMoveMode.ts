@@ -3,6 +3,7 @@ import type { Point } from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
 import { pointInBounds } from "../lib/geometry/bounds";
 import { useSelectedElements } from "./useSelectedElements";
+import { cloneElement } from "../lib/geometry/createElement";
 
 export function useMoveMode() {
   const isDraggingElements = useRef<boolean>(false);
@@ -40,7 +41,7 @@ export function useMoveMode() {
     const deltaY = worldPoint.y - lastMouseWorldPoint.current.y;
 
     const movedElements = selected.map((el) =>
-      el.clone({ x: el.x + deltaX, y: el.y + deltaY }),
+      cloneElement(el, { x: el.x + deltaX, y: el.y + deltaY }),
     );
     movedElements.forEach((el) => updateElement(el.id, el));
 

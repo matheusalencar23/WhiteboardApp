@@ -1,4 +1,5 @@
 import { getGroupBounds } from "../lib/geometry/bounds";
+import { getElementLocalBounds } from "../lib/geometry/elementOperations";
 import { useCanvasStore } from "../store/useCanvasStore";
 
 export function useSelectedElements() {
@@ -10,7 +11,7 @@ export function useSelectedElements() {
 
   const bounds =
     selected.length === 1
-      ? selected[0].getLocalBounds()
+      ? getElementLocalBounds(selected[0])
       : getGroupBounds(selected);
 
   const angle = selected.length === 1 ? selected[0].angle : 0;

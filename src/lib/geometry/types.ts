@@ -1,21 +1,6 @@
-import type { RoughCanvas } from "roughjs/bin/canvas";
-import type { DrawingTool } from "../canvas/types";
-
 export interface Point {
   x: number;
   y: number;
-}
-
-export interface Properties {
-  id?: string;
-  stroke?: string;
-  strokeWidth?: number;
-  roughness?: number;
-  fill?: string;
-  fillStyle?: string;
-  bowing?: number;
-  seed?: number;
-  angle?: number;
 }
 
 export interface Bounds {
@@ -36,24 +21,33 @@ export type HandleType =
   | "w"
   | "rotation";
 
-export interface IElement {
+export interface BaseElement {
   id: string;
-  type: DrawingTool | null;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  angle: number;
   stroke: string;
   strokeWidth: number;
   roughness: number;
   bowing: number;
   seed: number;
-  angle: number;
-  properties: Properties;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-
-  draw(_rc: RoughCanvas, _ctx: CanvasRenderingContext2D): void;
-  containsPoint(point: Point): boolean;
-  getBounds(): Bounds;
-  getLocalBounds(): Bounds;
-  clone(overrides: Partial<Bounds & Properties>): IElement;
 }
+
+export interface RectangleElement extends BaseElement {
+  type: "rectangle";
+  fill: string;
+  fillStyle: string;
+}
+
+export interface EllipseElement extends BaseElement {
+  type: "ellipse";
+  fill: string;
+  fillStyle: string;
+}
+
+export type CanvasElement = RectangleElement | EllipseElement;
+
+export type ElementOverrides = Partial<Omit<BaseElement, "id">> &
+  Partial<Pick<RectangleElement | EllipseElement, "fill" | "fillStyle">>;

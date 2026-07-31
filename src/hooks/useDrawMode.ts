@@ -1,7 +1,7 @@
 import { useRef } from "react";
-import type { Point } from "../lib/geometry/types";
-import { ElementFactory } from "../lib/geometry/elementFactory";
+import type { CanvasElement, Point } from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
+import { cloneElement, createElement } from "../lib/geometry/createElement";
 
 export function useDrawMode() {
   const initialPointDraw = useRef<Point>(null);
@@ -12,7 +12,7 @@ export function useDrawMode() {
   function startDrawing(worldPoint: Point) {
     if (!activeTool || activeTool === "selection") return;
 
-    const el = ElementFactory.create(activeTool!, worldPoint.x, worldPoint.y);
+    const el = createElement(activeTool, { x: worldPoint.x, y: worldPoint.y });
     addElement(el);
     elementDrawnId.current = el.id;
     initialPointDraw.current = worldPoint;
@@ -24,31 +24,24 @@ export function useDrawMode() {
   }
 
   function applyDrawing(worldPoint: Point) {
-    if (
-      !activeTool ||
-      activeTool === "selection" ||
-      !initialPointDraw.current ||
-      !elementDrawnId.current
-    ) {
-      return;
-    }
+    if (!initialPointDraw.current || !elementDrawnId.current) return;
 
-    const startX = initialPointDraw.current.x;
-    const startY = initialPointDraw.current.y;
-    const width = worldPoint.x - startX;
-    const height = worldPoint.y - startY;
+    const x = initialPointDraw.current.x;
+    const y = initialPointDraw.current.y;
+    const width = worldPoint.x - x;
+    const height = worldPoint.y - y;
+
     const elementDrawn = elements.find(
-      (el) => el.id === elementDrawnId.current,
+      (el): el is CanvasElement => el.id === elementDrawnId.current,
     );
 
-    const el = ElementFactory.create(
-      activeTool,
-      startX,
-      startY,
+    if (!elementDrawn) return;
+    const el = cloneElement(elementDrawn, {
+      x,
+      y,
       width,
       height,
-      { ...elementDrawn?.properties },
-    );
+    });
 
     updateElement(elementDrawnId.current, el);
   }

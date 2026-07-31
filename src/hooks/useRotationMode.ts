@@ -1,15 +1,16 @@
 import { useRef } from "react";
-import type { Bounds, IElement, Point } from "../lib/geometry/types";
+import type { Bounds, CanvasElement, Point } from "../lib/geometry/types";
 import { calculateRotationAngle, rotatePoint } from "../lib/geometry/transform";
 import { useCanvasStore } from "../store/useCanvasStore";
 import { getHandleAtPoint } from "../lib/geometry/handles";
 import { useSelectedElements } from "./useSelectedElements";
+import { cloneElement } from "../lib/geometry/createElement";
 
 export function useRotationMode() {
   const initialMouseAngle = useRef<number>(0);
   const initialElementAngles = useRef<Map<string, number>>(new Map());
   const initialGroupBounds = useRef<Bounds | null>(null);
-  const initialElementsSnapshot = useRef<IElement[]>([]);
+  const initialElementsSnapshot = useRef<CanvasElement[]>([]);
 
   const { updateElement, zoom, activeHandle, setActiveHandle } =
     useCanvasStore();
@@ -78,7 +79,7 @@ export function useRotationMode() {
       const x = newCenter.x - el.width / 2;
       const y = newCenter.y - el.height / 2;
 
-      const updatedEl = el.clone({ x, y, angle: newAngle });
+      const updatedEl = cloneElement(el, { x, y, angle: newAngle });
       updateElement(el.id, updatedEl);
     });
     return;

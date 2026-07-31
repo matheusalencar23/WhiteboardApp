@@ -1,4 +1,4 @@
-import type { Bounds, IElement, Point } from "../lib/geometry/types";
+import type { Bounds, CanvasElement, Point } from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
 import { getHandleAtPoint } from "../lib/geometry/handles";
 import {
@@ -7,10 +7,11 @@ import {
 } from "../lib/geometry/resize";
 import { useSelectedElements } from "./useSelectedElements";
 import { useRef } from "react";
+import { cloneElement } from "../lib/geometry/createElement";
 
 export function useResizeMode() {
   const initialGroupBounds = useRef<Bounds | null>(null);
-  const initialElementsSnapshot = useRef<IElement[]>([]);
+  const initialElementsSnapshot = useRef<CanvasElement[]>([]);
 
   const {
     updateElement,
@@ -54,8 +55,12 @@ export function useResizeMode() {
 
     if (snapshot.length === 1) {
       const el = snapshot[0];
-      const newBounds = calculateRotatedResize(el, activeHandle, worldPoint);
-      const updatedEl = el.clone({ ...newBounds });
+      const { x, y, width, height } = calculateRotatedResize(
+        el,
+        activeHandle,
+        worldPoint,
+      );
+      const updatedEl = cloneElement(el, { x, y, width, height });
       updateElement(el.id, updatedEl);
       return;
     }
@@ -67,10 +72,10 @@ export function useResizeMode() {
       worldPoint,
     );
 
-    resizedElements.forEach((el) => {
-      const resizedEl = snapshot.find((e) => e.id === el.id)!;
-      const updatedEl = resizedEl.clone({ ...el });
-      updateElement(el.id, updatedEl);
+    resizedElements.forEach(({ id, x, y, width, height }) => {
+      const resizedEl = snapshot.find((e) => e.id === id)!;
+      const updatedEl = cloneElement(resizedEl, { x, y, width, height });
+      updateElement(id, updatedEl);
     });
   }
 

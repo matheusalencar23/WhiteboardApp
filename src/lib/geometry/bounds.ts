@@ -1,6 +1,7 @@
-import type { Bounds, IElement, Point } from "./types";
+import { getElementBounds } from "./elementOperations";
+import type { Bounds, CanvasElement, Point } from "./types";
 
-export function getGroupBounds(elements: IElement[]): Bounds | null {
+export function getGroupBounds(elements: CanvasElement[]): Bounds | null {
   if (elements.length === 0) return null;
 
   let minX = Infinity;
@@ -9,7 +10,7 @@ export function getGroupBounds(elements: IElement[]): Bounds | null {
   let maxY = -Infinity;
 
   elements.forEach((el) => {
-    const bounds = el.getBounds();
+    const bounds = getElementBounds(el);
     minX = Math.min(minX, bounds.x);
     minY = Math.min(minY, bounds.y);
     maxX = Math.max(maxX, bounds.x + bounds.width);
