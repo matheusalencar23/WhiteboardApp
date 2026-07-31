@@ -1,6 +1,7 @@
 import { useSelectedElements } from "../../hooks/useSelectedElements";
-import { ColorStrokeSelection } from "./ColorStrokeSelection/ColorStrokeSelection";
+import { StrokeColorSelection } from "./StrokeColorSelection/StrokeColorSelection";
 import "./style.css";
+import { StrokeWidthSlider } from "./StrokeWidthSlider/StrokeWidthSlider";
 
 export function StylePanel() {
   const { selected } = useSelectedElements();
@@ -9,7 +10,9 @@ export function StylePanel() {
     selected.length && (
       <div className="style-panel">
         <p className="style-panel-title">Stroke</p>
-        <ColorStrokeSelection />
+        <StrokeColorSelection />
+        <p className="style-panel-title">Stroke Width</p>
+        <StrokeWidthSlider />
       </div>
     )
   );

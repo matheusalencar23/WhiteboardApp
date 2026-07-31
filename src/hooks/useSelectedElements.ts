@@ -1,5 +1,6 @@
 import { getGroupBounds } from "../lib/geometry/bounds";
 import { getElementLocalBounds } from "../lib/geometry/elementOperations";
+import type { CanvasElement } from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
 
 export function useSelectedElements() {
@@ -16,5 +17,16 @@ export function useSelectedElements() {
 
   const angle = selected.length === 1 ? selected[0].angle : 0;
 
-  return { selected, bounds, angle };
+  function getSelectedPropertyValue<K extends keyof CanvasElement>(
+    key: K,
+  ): CanvasElement[K] | null {
+    if (selected.length === 0) return null;
+
+    const first = selected[0][key];
+    const allSame = selected.every((el) => el[key] === first);
+
+    return allSame ? first : null;
+  }
+
+  return { selected, bounds, angle, getSelectedPropertyValue };
 }

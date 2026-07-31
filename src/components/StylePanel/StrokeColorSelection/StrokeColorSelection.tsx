@@ -8,17 +8,12 @@ import { useState } from "react";
 
 const STROKE_COLORS = ["#000000", "#ff0000", "#00ff00", "#0000ff"];
 
-export function ColorStrokeSelection() {
+export function StrokeColorSelection() {
   const { updateElement } = useCanvasStore();
-  const { selected } = useSelectedElements();
+  const { selected, getSelectedPropertyValue } = useSelectedElements();
+  const selectedStrokeColor = getSelectedPropertyValue("stroke") ?? "";
 
   const [showPicker, setShowPicker] = useState(false);
-
-  const firstStroke = selected[0]?.stroke;
-  const selectedStrokeColor =
-    firstStroke && selected.every((el) => el.stroke === firstStroke)
-      ? firstStroke
-      : "";
 
   function changeStrokeColor(color: string) {
     selected.forEach((el) =>
@@ -36,6 +31,7 @@ export function ColorStrokeSelection() {
       <div className="stroke-color-container">
         {STROKE_COLORS.map((color) => (
           <div
+            key={color}
             className={`stroke-color-item ${color === selectedStrokeColor ? "active" : ""}`}
           >
             <button
