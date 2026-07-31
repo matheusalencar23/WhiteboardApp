@@ -7,7 +7,10 @@ import {
 } from "../lib/geometry/resize";
 import { useSelectedElements } from "./useSelectedElements";
 import { useRef } from "react";
-import { cloneElement } from "../lib/geometry/createElement";
+import {
+  applyBoundsToElement,
+  getElementLocalBounds,
+} from "../lib/geometry/elementOperations";
 
 export function useResizeMode() {
   const initialGroupBounds = useRef<Bounds | null>(null);
@@ -55,12 +58,14 @@ export function useResizeMode() {
 
     if (snapshot.length === 1) {
       const el = snapshot[0];
-      const { x, y, width, height } = calculateRotatedResize(
-        el,
+      const oldBounds = getElementLocalBounds(el);
+      const newBounds = calculateRotatedResize(
+        oldBounds,
+        el.angle,
         activeHandle,
         worldPoint,
       );
-      const updatedEl = cloneElement(el, { x, y, width, height });
+      const updatedEl = applyBoundsToElement(el, oldBounds, newBounds);
       updateElement(el.id, updatedEl);
       return;
     }
@@ -74,7 +79,9 @@ export function useResizeMode() {
 
     resizedElements.forEach(({ id, x, y, width, height }) => {
       const resizedEl = snapshot.find((e) => e.id === id)!;
-      const updatedEl = cloneElement(resizedEl, { x, y, width, height });
+      const oldBounds = getElementLocalBounds(resizedEl);
+      const newBounds = { x, y, width, height };
+      const updatedEl = applyBoundsToElement(resizedEl, oldBounds, newBounds);
       updateElement(id, updatedEl);
     });
   }

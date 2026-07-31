@@ -5,6 +5,7 @@ import { useCanvasStore } from "../store/useCanvasStore";
 import { getHandleAtPoint } from "../lib/geometry/handles";
 import { useSelectedElements } from "./useSelectedElements";
 import { cloneElement } from "../lib/geometry/createElement";
+import { getElementLocalBounds } from "../lib/geometry/elementOperations";
 
 export function useRotationMode() {
   const initialMouseAngle = useRef<number>(0);
@@ -66,18 +67,18 @@ export function useRotationMode() {
 
     initialElementsSnapshot.current.forEach((el) => {
       const startAngle = initialElementAngles.current.get(el.id) || 0;
-
       let newAngle = (startAngle + deltaAngle) % 360;
       if (newAngle < 0) newAngle += 360;
 
+      const localBounds = getElementLocalBounds(el);
       const origCenter: Point = {
-        x: el.x + el.width / 2,
-        y: el.y + el.height / 2,
+        x: localBounds.x + localBounds.width / 2,
+        y: localBounds.y + localBounds.height / 2,
       };
 
       const newCenter = rotatePoint(origCenter, groupCenter, deltaAngle);
-      const x = newCenter.x - el.width / 2;
-      const y = newCenter.y - el.height / 2;
+      const x = el.x + (newCenter.x - origCenter.x);
+      const y = el.y + (newCenter.y - origCenter.y);
 
       const updatedEl = cloneElement(el, { x, y, angle: newAngle });
       updateElement(el.id, updatedEl);

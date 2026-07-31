@@ -1,10 +1,27 @@
 import { nanoid } from "nanoid";
 import type { DrawingTool } from "../canvas/types";
-import type { CanvasElement, EllipseElement, RectangleElement } from "./types";
+import type {
+  CanvasElement,
+  EllipseElement,
+  LineElement,
+  Point,
+  RectangleElement,
+} from "./types";
 
-type NewElementInput = Partial<Omit<CanvasElement, "id" | "type">> & {
+type NewElementInput = {
   x: number;
   y: number;
+  width?: number;
+  height?: number;
+  angle?: number;
+  stroke?: string;
+  strokeWidth?: number;
+  roughness?: number;
+  bowing?: number;
+  seed?: number;
+  fill?: string | null;
+  fillStyle?: string;
+  points?: Point[];
 };
 
 const DEFAULTS = {
@@ -15,7 +32,7 @@ const DEFAULTS = {
   strokeWidth: 2,
   roughness: 1.5,
   bowing: 1,
-  fill: null,
+  fill: null as string | null,
   fillStyle: "hachure",
 };
 
@@ -32,9 +49,53 @@ export function createElement(
 
   switch (tool) {
     case "rectangle":
-      return { ...base, type: "rectangle" } as RectangleElement;
+      return {
+        id: base.id,
+        x: base.x,
+        y: base.y,
+        width: base.width,
+        height: base.height,
+        angle: base.angle,
+        stroke: base.stroke,
+        strokeWidth: base.strokeWidth,
+        roughness: base.roughness,
+        bowing: base.bowing,
+        seed: base.seed,
+        fill: base.fill,
+        fillStyle: base.fillStyle,
+        type: "rectangle",
+      } satisfies RectangleElement;
     case "ellipse":
-      return { ...base, type: "ellipse" } as EllipseElement;
+      return {
+        id: base.id,
+        x: base.x,
+        y: base.y,
+        width: base.width,
+        height: base.height,
+        angle: base.angle,
+        stroke: base.stroke,
+        strokeWidth: base.strokeWidth,
+        roughness: base.roughness,
+        bowing: base.bowing,
+        seed: base.seed,
+        fill: base.fill,
+        fillStyle: base.fillStyle,
+        type: "ellipse",
+      } satisfies EllipseElement;
+    case "line":
+      return {
+        id: base.id,
+        x: base.x,
+        y: base.y,
+        angle: base.angle,
+        stroke: base.stroke,
+        strokeWidth: base.strokeWidth,
+        roughness: base.roughness,
+        bowing: base.bowing,
+        seed: base.seed,
+        points: input.points ?? [{ x: 0, y: 0 }],
+        type: "line",
+      } as LineElement;
   }
 }
 

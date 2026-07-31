@@ -5,6 +5,7 @@ import { RiRectangleLine } from "react-icons/ri";
 import "./style.css";
 import type { IconType } from "react-icons";
 import { IoEllipseOutline } from "react-icons/io5";
+import { TbLine } from "react-icons/tb";
 
 const tools: { name: Tool; icon: IconType }[] = [
   {
@@ -18,6 +19,10 @@ const tools: { name: Tool; icon: IconType }[] = [
   {
     name: "ellipse",
     icon: IoEllipseOutline,
+  },
+  {
+    name: "line",
+    icon: TbLine,
   },
 ];
 

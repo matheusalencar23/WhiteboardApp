@@ -26,14 +26,32 @@ export function useDrawMode() {
 
     if (drawnId) {
       const el = elements.find((el) => el.id === elementDrawnId.current);
-      if (
-        el &&
-        Math.abs(el.width) < MIN_DRAW_SIZE &&
-        Math.abs(el.height) < MIN_DRAW_SIZE
-      ) {
-        deleteElement(drawnId);
+
+      if (el) {
+        if (el.type === "line") {
+          const [start, end] = el.points;
+          if (!end) {
+            deleteElement(drawnId);
+          } else {
+            const dx = end.x - start.x;
+            const dy = end.y - start.y;
+            const length = Math.hypot(dx, dy);
+
+            if (length < MIN_DRAW_SIZE) {
+              deleteElement(drawnId);
+            }
+          }
+        } else {
+          if (
+            Math.abs(el.width) < MIN_DRAW_SIZE &&
+            Math.abs(el.height) < MIN_DRAW_SIZE
+          ) {
+            deleteElement(drawnId);
+          }
+        }
       }
     }
+
     initialPointDraw.current = null;
     elementDrawnId.current = null;
   }
@@ -43,14 +61,29 @@ export function useDrawMode() {
 
     const x = initialPointDraw.current.x;
     const y = initialPointDraw.current.y;
-    const width = worldPoint.x - x;
-    const height = worldPoint.y - y;
 
     const elementDrawn = elements.find(
       (el) => el.id === elementDrawnId.current,
     );
 
     if (!elementDrawn) return;
+
+    if (elementDrawn?.type === "line") {
+      const dx = worldPoint.x - x;
+      const dy = worldPoint.y - y;
+      const updated = cloneElement(elementDrawn, {
+        points: [
+          { x: 0, y: 0 },
+          { x: dx, y: dy },
+        ],
+      });
+      console.log("chegou aqui");
+      updateElement(elementDrawnId.current, updated);
+      return;
+    }
+
+    const width = worldPoint.x - x;
+    const height = worldPoint.y - y;
     const el = cloneElement(elementDrawn, {
       x,
       y,

@@ -43,11 +43,11 @@ import type { Bounds, CanvasElement, HandleType, Point } from "./types";
  * o arraste.
  */
 export function calculateRotatedResize(
-  element: CanvasElement,
+  bounds: Bounds,
+  angle: number,
   handle: HandleType,
   mouse: Point,
 ): Bounds {
-  const angle = element.angle || 0;
   const rad = (angle * Math.PI) / 180;
   const cos = Math.cos(rad);
   const sin = Math.sin(rad);
@@ -55,20 +55,19 @@ export function calculateRotatedResize(
   const uX = { x: cos, y: sin };
   const uY = { x: -sin, y: cos };
 
-  const cX = element.x + element.width / 2;
-  const cY = element.y + element.height / 2; // fix: era element.x/width
+  const cX = bounds.x + bounds.width / 2;
+  const cY = bounds.y + bounds.height / 2;
 
   const dx = mouse.x - cX;
   const dy = mouse.y - cY;
   const projX = dx * uX.x + dy * uX.y;
   const projY = dx * uY.x + dy * uY.y;
 
-  const halfWidth = element.width / 2;
-  const halfHeight = element.height / 2;
+  const halfWidth = bounds.width / 2;
+  const halfHeight = bounds.height / 2;
 
-  let rawWidth = element.width;
-  let rawHeight = element.height;
-
+  let rawWidth = bounds.width;
+  let rawHeight = bounds.height;
   let anchorSignX = 0;
   let anchorSignY = 0;
 
@@ -76,7 +75,7 @@ export function calculateRotatedResize(
     rawWidth = projX + halfWidth;
     anchorSignX = -1;
   } else if (handle.includes("w")) {
-    rawWidth = halfWidth - projX; // fix: era halfHeight
+    rawWidth = halfWidth - projX;
     anchorSignX = 1;
   }
 
