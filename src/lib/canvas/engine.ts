@@ -1,36 +1,19 @@
 import rough from "roughjs";
-import type { CanvasElement, Point } from "../geometry/types";
-import { useCanvasStore } from "../../store/useCanvasStore";
-import { getGroupBounds } from "../geometry/bounds";
+import type { CanvasElement } from "../geometry/types";
+import { applyCameraTransform, type Camera } from "./camera";
 import { drawGrid } from "./grid";
-import { drawSelectionHandles, drawSubSelectionBox } from "./selectionBox";
-import { drawSelectionRect } from "./selectionRect";
-import {
-  drawElement,
-  getElementLocalBounds,
-} from "../geometry/elementOperations";
+import { drawElement } from "../geometry/elementOperations";
 
 /**
- * Desenha o canvas inteiro do zero a cada frame (sem dirty-checking):
- * grid -> elementos -> caixa de seleção por arraste -> handles de
- * seleção. A ordem importa: cada camada é desenhada por cima da
- * anterior.
- *
- * Duas transformações de contexto se sobrepõem aqui:
- * 1. translate(pan) + scale(zoom): aplicada uma vez, no início, para
- *    que TUDO daqui pra baixo já seja desenhado em coordenadas de
- *    MUNDO — ou seja, o resto do código de desenho não precisa se
- *    preocupar com pan/zoom, só com x/y reais dos elementos.
- * 2. translate(centro) + rotate(angle) + translate(-centro): aplicada
- *    individualmente por elemento/seleção que tenha rotação, dentro de
- *    save()/restore() próprios, para não vazar a rotação para o que
- *    vem depois.
+ * Redesenha o canvas inteiro a cada frame relevante, sem dirty-checking.
+ * Ordem: grid -> elementos (ainda não implementado) -> seleção (idem).
+ * O parâmetro `elements` já existe na assinatura para não precisar
+ * mudar a chamada em Canvas.tsx quando o desenho de formas for adicionado.
  */
 export function render(
   canvas: HTMLCanvasElement,
   elements: CanvasElement[],
-  zoom: number,
-  pan: Point,
+  camera: Camera,
 ) {
   const ctx = canvas.getContext("2d")!;
   const dpr = window.devicePixelRatio || 1;
@@ -48,44 +31,12 @@ export function render(
   ctx.scale(dpr, dpr);
 
   ctx.save();
-  ctx.translate(pan.x, pan.y);
-  ctx.scale(zoom, zoom);
+  applyCameraTransform(ctx, camera);
 
-  drawGrid(ctx, width, height, zoom, pan);
+  drawGrid(ctx, width, height, camera);
 
   const rc = rough.canvas(canvas);
-
   elements.forEach((el) => drawElement(el, rc, ctx));
-
-  const { selectedElementIds, selectionBox } = useCanvasStore.getState();
-
-  if (selectionBox) {
-    drawSelectionRect(ctx, zoom, selectionBox);
-  }
-
-  if (selectedElementIds && selectedElementIds.length > 0) {
-    const selectedElements = elements.filter((el) =>
-      selectedElementIds.includes(el.id),
-    );
-
-    if (selectedElementIds.length === 1) {
-      const bounds = getElementLocalBounds(selectedElements[0]);
-      const angle = selectedElements[0].angle;
-      drawSelectionHandles(ctx, zoom, bounds, angle);
-    } else {
-      const groupBounds = getGroupBounds(selectedElements);
-
-      if (groupBounds) {
-        drawSelectionHandles(ctx, zoom, groupBounds);
-      }
-
-      selectedElements.forEach((el) => {
-        const bounds = getElementLocalBounds(el);
-        const angle = el.angle;
-        drawSubSelectionBox(ctx, zoom, bounds, angle);
-      });
-    }
-  }
 
   ctx.restore();
 }

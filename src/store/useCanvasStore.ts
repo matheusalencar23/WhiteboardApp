@@ -1,38 +1,21 @@
 import { create } from "zustand";
-import type { CanvasElement, HandleType, Point } from "../lib/geometry/types";
-import type { Tool } from "../lib/canvas/types";
+import { IDENTITY_CAMERA, type Camera } from "../lib/canvas/camera";
+import type { CanvasElement, Point } from "../lib/geometry/types";
 
 interface CanvasStore {
   elements: CanvasElement[];
   addElement: (el: CanvasElement) => void;
   updateElement: (id: string, el: CanvasElement) => void;
-  deleteElement: (id: string) => void;
 
-  activeTool: Tool;
-  setTool: (tool: Tool) => void;
-
-  zoom: number;
-  setZoom: (zoom: number | ((prev: number) => number)) => void;
-
-  pan: Point;
-  setPan: (pan: Point | ((prev: Point) => Point)) => void;
-
-  setZoomAndPan: (zoom: number, pan: Point) => void;
+  camera: Camera;
+  setCamera: (camera: Camera | ((prev: Camera) => Camera)) => void;
 
   selectedElementIds: string[];
-  setSelectedElementIds: (ids: string[]) => void;
-
   deleteSelectedElements: () => void;
 
   selectionBox: { start: Point; current: Point } | null;
-  setSelectionBox: (box: { start: Point; current: Point } | null) => void;
 
   cursor: string;
-  setCursor: (cursor: string) => void;
-  clearCursor: () => void;
-
-  activeHandle: HandleType | null;
-  setActiveHandle: (handle: HandleType | null) => void;
 }
 
 export const useCanvasStore = create<CanvasStore>((set) => ({
@@ -42,30 +25,14 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
     set((state) => ({
       elements: state.elements.map((el) => (el.id === id ? newEl : el)),
     })),
-  deleteElement: (id) =>
+
+  camera: IDENTITY_CAMERA,
+  setCamera: (camera) =>
     set((state) => ({
-      elements: state.elements.filter((el) => el.id !== id),
+      camera: typeof camera === "function" ? camera(state.camera) : camera,
     })),
-
-  activeTool: "selection",
-  setTool: (tool) => set({ activeTool: tool }),
-
-  zoom: 1,
-  setZoom: (zoom) =>
-    set((state) => ({
-      zoom: typeof zoom === "function" ? zoom(state.zoom) : zoom,
-    })),
-
-  pan: { x: 0, y: 0 },
-  setPan: (pan) =>
-    set((state) => ({ pan: typeof pan === "function" ? pan(state.pan) : pan })),
-
-  setZoomAndPan: (zoom, pan) => set(() => ({ zoom, pan })),
 
   selectedElementIds: [],
-  setSelectedElementIds: (elementIds) =>
-    set(() => ({ selectedElementIds: elementIds })),
-
   deleteSelectedElements: () =>
     set((state) => ({
       elements: state.elements.filter(
@@ -75,12 +42,6 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
     })),
 
   selectionBox: null,
-  setSelectionBox: (box) => set(() => ({ selectionBox: box })),
 
   cursor: "default",
-  setCursor: (cursor) => set(() => ({ cursor })),
-  clearCursor: () => set(() => ({ cursor: "default" })),
-
-  activeHandle: null,
-  setActiveHandle: (handle) => set(() => ({ activeHandle: handle })),
 }));

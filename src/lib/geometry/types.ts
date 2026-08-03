@@ -21,50 +21,37 @@ export type HandleType =
   | "w"
   | "rotation";
 
-export interface BaseElement {
+interface ElementBase {
   id: string;
   x: number;
   y: number;
+  angle: number;
+  stroke: string;
+  strokeWidth: number;
+  roughness: number;
+  bowing: number;
+  seed: number;
+}
+
+export interface RectangleElement extends ElementBase {
+  type: "rectangle";
   width: number;
   height: number;
-  angle: number;
-  stroke: string;
-  strokeWidth: number;
-  roughness: number;
-  bowing: number;
-  seed: number;
-}
-
-export interface LinearBaseElement {
-  id: string;
-  x: number;
-  y: number;
-  points: Point[];
-  angle: number;
-  stroke: string;
-  strokeWidth: number;
-  roughness: number;
-  bowing: number;
-  seed: number;
-}
-
-export interface RectangleElement extends BaseElement {
-  type: "rectangle";
   fill: string | null;
   fillStyle: string;
 }
 
-export interface EllipseElement extends BaseElement {
+export interface EllipseElement extends ElementBase {
   type: "ellipse";
+  width: number;
+  height: number;
   fill: string | null;
   fillStyle: string;
 }
 
-export interface LineElement extends LinearBaseElement {
+export interface LineElement extends ElementBase {
   type: "line";
+  points: Point[];
 }
 
 export type CanvasElement = RectangleElement | EllipseElement | LineElement;
-
-export type ElementOverrides = Partial<Omit<BaseElement, "id">> &
-  Partial<Pick<RectangleElement | EllipseElement, "fill" | "fillStyle">>;

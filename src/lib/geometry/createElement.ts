@@ -8,7 +8,7 @@ import type {
   RectangleElement,
 } from "./types";
 
-type NewElementInput = {
+interface NewElementInput {
   x: number;
   y: number;
   width?: number;
@@ -18,16 +18,12 @@ type NewElementInput = {
   strokeWidth?: number;
   roughness?: number;
   bowing?: number;
-  seed?: number;
   fill?: string | null;
   fillStyle?: string;
   points?: Point[];
-};
+}
 
-const DEFAULTS = {
-  width: 0,
-  height: 0,
-  angle: 0,
+const DEFAULT_STYLE = {
   stroke: "#000000",
   strokeWidth: 2,
   roughness: 1.5,
@@ -40,62 +36,60 @@ export function createElement(
   tool: DrawingTool,
   input: NewElementInput,
 ): CanvasElement {
-  const base = {
-    id: nanoid(),
-    seed: Math.floor(Math.random() * 100000),
-    ...DEFAULTS,
-    ...input,
-  };
+  const id = nanoid();
+  const seed = Math.floor(Math.random() * 10000);
+  const style = { ...DEFAULT_STYLE, ...input };
+  const angle = input.angle ?? 0;
 
   switch (tool) {
     case "rectangle":
       return {
-        id: base.id,
-        x: base.x,
-        y: base.y,
-        width: base.width,
-        height: base.height,
-        angle: base.angle,
-        stroke: base.stroke,
-        strokeWidth: base.strokeWidth,
-        roughness: base.roughness,
-        bowing: base.bowing,
-        seed: base.seed,
-        fill: base.fill,
-        fillStyle: base.fillStyle,
+        id,
         type: "rectangle",
+        angle,
+        seed,
+        x: input.x,
+        y: input.y,
+        width: input.width ?? 0,
+        height: input.height ?? 0,
+        stroke: style.stroke,
+        strokeWidth: style.strokeWidth,
+        roughness: style.roughness,
+        bowing: style.bowing,
+        fill: style.fill,
+        fillStyle: style.fillStyle,
       } satisfies RectangleElement;
     case "ellipse":
       return {
-        id: base.id,
-        x: base.x,
-        y: base.y,
-        width: base.width,
-        height: base.height,
-        angle: base.angle,
-        stroke: base.stroke,
-        strokeWidth: base.strokeWidth,
-        roughness: base.roughness,
-        bowing: base.bowing,
-        seed: base.seed,
-        fill: base.fill,
-        fillStyle: base.fillStyle,
+        id,
         type: "ellipse",
+        angle,
+        seed,
+        x: input.x,
+        y: input.y,
+        width: input.width ?? 0,
+        height: input.height ?? 0,
+        stroke: style.stroke,
+        strokeWidth: style.strokeWidth,
+        roughness: style.roughness,
+        bowing: style.bowing,
+        fill: style.fill,
+        fillStyle: style.fillStyle,
       } satisfies EllipseElement;
     case "line":
       return {
-        id: base.id,
-        x: base.x,
-        y: base.y,
-        angle: base.angle,
-        stroke: base.stroke,
-        strokeWidth: base.strokeWidth,
-        roughness: base.roughness,
-        bowing: base.bowing,
-        seed: base.seed,
-        points: input.points ?? [{ x: 0, y: 0 }],
+        id,
         type: "line",
-      } as LineElement;
+        angle,
+        seed,
+        x: input.x,
+        y: input.y,
+        stroke: style.stroke,
+        strokeWidth: style.strokeWidth,
+        roughness: style.roughness,
+        bowing: style.bowing,
+        points: input.points ?? [{ x: 0, y: 0 }],
+      } satisfies LineElement;
   }
 }
 
