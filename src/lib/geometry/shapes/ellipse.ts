@@ -18,7 +18,7 @@ export function drawEllipse(
     ctx.translate(-cx, -cy);
   }
 
-  rc.ellipse(el.x, el.y, el.width, el.height, {
+  rc.ellipse(cx, cy, Math.abs(el.width), Math.abs(el.height), {
     stroke: el.stroke,
     strokeWidth: el.strokeWidth,
     roughness: el.roughness,

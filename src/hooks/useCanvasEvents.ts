@@ -1,8 +1,10 @@
 import { screenToWorld } from "../lib/canvas/camera";
 import { useCanvasStore } from "../store/useCanvasStore";
+import { useDrawMode } from "./useDrawMode";
 
 export function useCanvasEvents() {
-  const { camera } = useCanvasStore();
+  const { camera, activeTool } = useCanvasStore();
+  const drawMode = useDrawMode();
 
   function worldPointFromPointerEvent(event: React.PointerEvent) {
     return screenToWorld(camera, {
@@ -12,14 +14,24 @@ export function useCanvasEvents() {
   }
 
   function handlePointerDown(event: React.PointerEvent) {
-    void worldPointFromPointerEvent(event);
+    const worldPoint = worldPointFromPointerEvent(event);
+
+    if (activeTool === "selection") return;
+
+    drawMode.startDrawing(worldPoint);
   }
 
   function handlePointerMove(event: React.PointerEvent) {
-    void worldPointFromPointerEvent(event);
+    const worldPoint = worldPointFromPointerEvent(event);
+
+    if (activeTool === "selection") return;
+
+    drawMode.updateDrawing(worldPoint);
   }
 
-  function handlePointerUp() {}
+  function handlePointerUp() {
+    drawMode.stopDrawing();
+  }
 
   return { handlePointerDown, handlePointerMove, handlePointerUp };
 }

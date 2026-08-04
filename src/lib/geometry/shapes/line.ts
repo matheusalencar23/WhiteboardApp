@@ -74,6 +74,34 @@ export function lineContainsPoint(
   return false;
 }
 
+/**
+ * Calcula a menor distância entre um ponto `p` e o segmento de reta `AB`.
+ *
+ * A ideia é projetar o ponto `P` sobre a reta que passa por `A` e `B`.
+ * O parâmetro `t` indica a posição dessa projeção ao longo do segmento:
+ *
+ *   P(t) = A + t(B - A)
+ *
+ * Onde:
+ * - t = 0   → projeção coincide com A.
+ * - t = 1   → projeção coincide com B.
+ * - 0 < t < 1 → projeção está entre A e B.
+ * - t < 0   → projeção fica antes de A.
+ * - t > 1   → projeção fica depois de B.
+ *
+ * O valor de `t` é obtido pela projeção do vetor AP sobre o vetor AB,
+ * utilizando o produto escalar:
+ *
+ *   t = (AP · AB) / |AB|²
+ *
+ * Como queremos a distância ao segmento (e não à reta infinita),
+ * `t` é limitado ao intervalo [0, 1]. Em seguida, reconstruímos o
+ * ponto mais próximo do segmento através da interpolação:
+ *
+ *   closest = A + t(B - A)
+ *
+ * Por fim, retornamos a distância euclidiana entre `P` e `closest`.
+ */
 export function distanceToSegment(p: Point, a: Point, b: Point) {
   const dx = b.x - a.x;
   const dy = b.y - a.y;

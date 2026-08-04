@@ -1,11 +1,13 @@
 import { create } from "zustand";
 import { IDENTITY_CAMERA, type Camera } from "../lib/canvas/camera";
 import type { CanvasElement, Point } from "../lib/geometry/types";
+import type { Tool } from "../lib/canvas/types";
 
 interface CanvasStore {
   elements: CanvasElement[];
   addElement: (el: CanvasElement) => void;
   updateElement: (id: string, el: CanvasElement) => void;
+  deleteElement: (id: string) => void;
 
   camera: Camera;
   setCamera: (camera: Camera | ((prev: Camera) => Camera)) => void;
@@ -16,6 +18,9 @@ interface CanvasStore {
   selectionBox: { start: Point; current: Point } | null;
 
   cursor: string;
+
+  activeTool: Tool;
+  setTool: (tool: Tool) => void;
 }
 
 export const useCanvasStore = create<CanvasStore>((set) => ({
@@ -25,6 +30,9 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
     set((state) => ({
       elements: state.elements.map((el) => (el.id === id ? newEl : el)),
     })),
+
+  deleteElement: (id) =>
+    set((state) => ({ elements: state.elements.filter((el) => el.id !== id) })),
 
   camera: IDENTITY_CAMERA,
   setCamera: (camera) =>
@@ -44,4 +52,7 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
   selectionBox: null,
 
   cursor: "default",
+
+  activeTool: "selection",
+  setTool: (tool) => set(() => ({ activeTool: tool })),
 }));
