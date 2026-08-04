@@ -33,7 +33,6 @@ export function useMoveMode() {
 
     const deltaX = worldPoint.x - lastPoint.current.x;
     const deltaY = worldPoint.y - lastPoint.current.y;
-    console.log(deltaX, deltaY);
     
     selected.forEach((el) =>
       updateElement(el.id, moveElement(el, deltaX, deltaY)),
