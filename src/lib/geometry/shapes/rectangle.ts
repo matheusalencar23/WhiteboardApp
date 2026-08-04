@@ -9,7 +9,7 @@ export function drawRectangle(
   ctx: CanvasRenderingContext2D,
 ) {
   const cx = el.x + el.width / 2;
-  const cy = el.x + el.width / 2;
+  const cy = el.y + el.height / 2;
 
   ctx.save();
 

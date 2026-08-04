@@ -6,7 +6,8 @@ export function getRotatedEnvelope(
   shapeGeometry: Bounds,
   angle: number,
 ): Bounds {
-  if (angle) return shapeGeometry;
+  console.log('chegou aqui')
+  if (angle === 0) return shapeGeometry;
 
   const center = {
     x: shapeGeometry.x + shapeGeometry.width / 2,

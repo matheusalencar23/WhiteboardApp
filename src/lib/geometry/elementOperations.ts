@@ -18,6 +18,7 @@ import {
   getLineGeometry,
   lineContainsPoint,
 } from "./shapes/line";
+import { cloneElement } from "./createElement";
 
 export const MIN_DRAW_SIZE = 2;
 
@@ -89,4 +90,20 @@ export function isElementEmpty(el: CanvasElement): boolean {
     Math.abs(geometry.width) < MIN_DRAW_SIZE &&
     Math.abs(geometry.height) < MIN_DRAW_SIZE
   );
+}
+
+/**
+ * Move um elemento por um delta, independente do tipo de forma.
+ *
+ * Funciona genericamente para qualquer forma porque toda geometria é
+ * ancorada em x/y — inclusive LineElement, cujos `points` são relativos
+ * a x/y, então não precisam ser recalculados: eles "andam junto"
+ * automaticamente ao transladar apenas x/y.
+ */
+export function moveElement(
+  el: CanvasElement,
+  deltaX: number,
+  deltaY: number,
+): CanvasElement {
+  return cloneElement(el, { x: el.x + deltaX, y: el.y + deltaY });
 }
