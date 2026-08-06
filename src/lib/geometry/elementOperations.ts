@@ -25,6 +25,7 @@ import {
   getArrowBounds,
   getArrowGeometry,
 } from "./shapes/arrow";
+import { toShapeSpace } from "./coordinates";
 
 export const MIN_DRAW_SIZE = 2;
 
@@ -45,15 +46,18 @@ export function drawElement(
   }
 }
 export function elementContainsPoint(el: CanvasElement, point: Point): boolean {
+  const geometry = getElementGeometry(el);
+  const testPoint = toShapeSpace(point, geometry, el.angle);
+
   switch (el.type) {
     case "rectangle":
-      return rectangleContainsPoint(el, point);
+      return rectangleContainsPoint(el, testPoint);
     case "ellipse":
-      return ellipseContainsPoint(el, point);
+      return ellipseContainsPoint(el, testPoint);
     case "line":
-      return lineContainsPoint(el, point);
+      return lineContainsPoint(el, testPoint);
     case "arrow":
-      return arrowContainsPoint(el, point);
+      return arrowContainsPoint(el, testPoint);
   }
 }
 
