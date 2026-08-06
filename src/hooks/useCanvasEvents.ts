@@ -44,6 +44,10 @@ export function useCanvasEvents() {
   function handlePointerMove(event: React.PointerEvent) {
     const worldPoint = worldPointFromPointerEvent(event);
 
+    if (!resizeMode.updateHoverCursor(worldPoint)) {
+      rotationMode.updateHoverCursor(worldPoint);
+    }
+
     if (rotationMode.isRotating()) {
       rotationMode.applyRotation(worldPoint);
       return;

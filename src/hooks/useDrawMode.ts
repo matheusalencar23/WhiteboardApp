@@ -28,7 +28,7 @@ export function useDrawMode() {
 
     const start = startPoint.current;
 
-    if (el.type === "line") {
+    if (el.type === "line" || el.type === "arrow") {
       updateElement(
         el.id,
         cloneElement(el, {

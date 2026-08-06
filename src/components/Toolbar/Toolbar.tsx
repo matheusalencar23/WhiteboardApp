@@ -5,9 +5,9 @@ import { RiRectangleLine } from "react-icons/ri";
 import "./style.css";
 import type { IconType } from "react-icons";
 import { IoEllipseOutline } from "react-icons/io5";
-import { TbLine } from "react-icons/tb";
+import { TbArrowLeftCircle, TbLine } from "react-icons/tb";
 
-const tools: { name: Tool; icon: IconType }[] = [
+const tools: { name: Tool; icon: IconType; style?: React.CSSProperties }[] = [
   {
     name: "selection",
     icon: FaMousePointer,
@@ -23,6 +23,13 @@ const tools: { name: Tool; icon: IconType }[] = [
   {
     name: "line",
     icon: TbLine,
+  },
+  {
+    name: "arrow",
+    icon: TbArrowLeftCircle,
+    style: {
+      transform: "rotate(135deg)"
+    }
   },
 ];
 
@@ -43,7 +50,7 @@ export function Toolbar() {
           className={activeTool === tool.name ? "active" : ""}
           title={tool.name}
         >
-          {<tool.icon size={16} />}
+          {<tool.icon size={16} style={tool.style} />}
         </button>
       ))}
     </div>

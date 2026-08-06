@@ -1,6 +1,8 @@
 import { nanoid } from "nanoid";
 import type { DrawingTool } from "../canvas/types";
 import type {
+  ArrowElement,
+  ArrowheadType,
   CanvasElement,
   EllipseElement,
   LineElement,
@@ -21,6 +23,8 @@ interface NewElementInput {
   fill?: string | null;
   fillStyle?: string;
   points?: Point[];
+  startArrowhead?: ArrowheadType;
+  endArrowhead?: ArrowheadType;
 }
 
 const DEFAULT_STYLE = {
@@ -90,6 +94,23 @@ export function createElement(
         bowing: style.bowing,
         points: input.points ?? [{ x: 0, y: 0 }],
       } satisfies LineElement;
+
+    case "arrow":
+      return {
+        id,
+        type: "arrow",
+        angle,
+        seed,
+        x: input.x,
+        y: input.y,
+        stroke: style.stroke,
+        strokeWidth: style.strokeWidth,
+        roughness: style.roughness,
+        bowing: style.bowing,
+        points: input.points ?? [{ x: 0, y: 0 }],
+        startArrowhead: input.startArrowhead ?? "none",
+        endArrowhead: input.endArrowhead ?? "triangle",
+      } satisfies ArrowElement;
   }
 }
 

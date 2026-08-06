@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { getHandlePositions, RESIZE_HANDLE_TYPES } from "../lib/canvas/handles";
+import { hitTestRezizeHandle } from "../lib/canvas/handles";
 import {
   type Bounds,
   type CanvasElement,
@@ -8,7 +8,6 @@ import {
 } from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
 import { useSelectedElements } from "./useSelectedElements";
-import { toShapeSpace } from "../lib/geometry/coordinates";
 import {
   applyBoundsToElement,
   getElementGeometry,
@@ -17,8 +16,6 @@ import {
   calculateGroupResize,
   calculateRotatedResize,
 } from "../lib/geometry/resize";
-
-const HIT_RADIUS = 8;
 
 export function useResizeMode() {
   const activeHandle = useRef<HandleType | null>(null);
@@ -31,18 +28,7 @@ export function useResizeMode() {
   function tryStartResizing(worldPoint: Point): boolean {
     if (selected.length === 0 || !bounds) return false;
 
-    const testPoint = toShapeSpace(worldPoint, bounds, angle);
-    const hitRadius = HIT_RADIUS / camera.zoom;
-    const positions = getHandlePositions(bounds, camera.zoom);
-
-    const hit = RESIZE_HANDLE_TYPES.find((type) => {
-      const p = positions[type];
-      return (
-        Math.abs(testPoint.x - p.x) <= hitRadius &&
-        Math.abs(testPoint.y - p.y) <= hitRadius
-      );
-    });
-
+    const hit = hitTestRezizeHandle(worldPoint, bounds, camera.zoom, angle);
     if (!hit) return false;
 
     activeHandle.current = hit;
@@ -96,5 +82,19 @@ export function useResizeMode() {
     startSnapshot.current = [];
   }
 
-  return { tryStartResizing, applyResize, isResizing, stopResizing };
+  function updateHoverCursor(worldPoint: Point): boolean {
+    if (!bounds || isResizing()) return false;
+
+    const hit = hitTestRezizeHandle(worldPoint, bounds, camera.zoom, angle);
+    setCursor(hit ? "grab" : "default");
+    return !!hit;
+  }
+
+  return {
+    tryStartResizing,
+    applyResize,
+    isResizing,
+    stopResizing,
+    updateHoverCursor,
+  };
 }

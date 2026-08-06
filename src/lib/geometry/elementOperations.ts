@@ -19,6 +19,12 @@ import {
   lineContainsPoint,
 } from "./shapes/line";
 import { cloneElement } from "./createElement";
+import {
+  arrowContainsPoint,
+  drawArrow,
+  getArrowBounds,
+  getArrowGeometry,
+} from "./shapes/arrow";
 
 export const MIN_DRAW_SIZE = 2;
 
@@ -34,6 +40,8 @@ export function drawElement(
       return drawEllipse(el, rc, ctx);
     case "line":
       return drawLine(el, rc, ctx);
+    case "arrow":
+      return drawArrow(el, rc, ctx);
   }
 }
 export function elementContainsPoint(el: CanvasElement, point: Point): boolean {
@@ -44,6 +52,8 @@ export function elementContainsPoint(el: CanvasElement, point: Point): boolean {
       return ellipseContainsPoint(el, point);
     case "line":
       return lineContainsPoint(el, point);
+    case "arrow":
+      return arrowContainsPoint(el, point);
   }
 }
 
@@ -55,6 +65,8 @@ export function getElementGeometry(el: CanvasElement): Bounds {
       return getEllipseGeometry(el);
     case "line":
       return getLineGeometry(el);
+    case "arrow":
+      return getArrowGeometry(el);
   }
 }
 
@@ -66,6 +78,8 @@ export function getElementBounds(el: CanvasElement): Bounds {
       return getEllipseBounds(el);
     case "line":
       return getLineBounds(el);
+    case "arrow":
+      return getArrowBounds(el);
   }
 }
 
@@ -118,7 +132,7 @@ export function applyBoundsToElement(
   oldBounds: Bounds,
   newBounds: Bounds,
 ): CanvasElement {
-  if (el.type === "line") {
+  if (el.type === "line" || el.type === "arrow") {
     const scaleX = newBounds.width / (oldBounds.width || 1);
     const scaleY = newBounds.height / (oldBounds.height || 1);
 
@@ -164,15 +178,6 @@ export function getGroupBounds(elements: CanvasElement[]) {
     minY = Math.min(minY, bounds.y);
     maxX = Math.max(maxX, bounds.x + bounds.width);
     maxY = Math.max(maxY, bounds.y + bounds.height);
-  });
-
-  console.table({
-    minX,
-    minY,
-    maxX,
-    maxY,
-    width: maxX - minX,
-    height: maxY - minY,
   });
 
   return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };

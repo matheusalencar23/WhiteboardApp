@@ -2,16 +2,13 @@ import { useRef } from "react";
 import type { Bounds, CanvasElement, Point } from "../lib/geometry/types";
 import { useSelectedElements } from "./useSelectedElements";
 import { useCanvasStore } from "../store/useCanvasStore";
-import { toShapeSpace } from "../lib/geometry/coordinates";
-import { getHandlePositions } from "../lib/canvas/handles";
+import { hitTestRotationHandle } from "../lib/canvas/handles";
 import { calculateRotationAngle, rotatePoint } from "../lib/geometry/transform";
 import {
   getElementGeometry,
   moveElement,
 } from "../lib/geometry/elementOperations";
 import { cloneElement } from "../lib/geometry/createElement";
-
-const HIT_RADIUS = 8;
 
 export function useRotationMode() {
   const isRotating = useRef(false);
@@ -21,19 +18,12 @@ export function useRotationMode() {
   const startElementAngles = useRef<Map<string, number>>(new Map());
 
   const { selected, bounds, angle } = useSelectedElements();
-  const { camera, updateElement } = useCanvasStore();
+  const { camera, updateElement, setCursor } = useCanvasStore();
 
   function tryStartRotating(worldPoint: Point): boolean {
     if (selected.length === 0 || !bounds) return false;
 
-    const testPoint = toShapeSpace(worldPoint, bounds, angle);
-    const hitRadius = HIT_RADIUS / camera.zoom;
-    const rotationHandle = getHandlePositions(bounds, camera.zoom).rotation;
-
-    const hit =
-      Math.abs(testPoint.x - rotationHandle.x) <= hitRadius &&
-      Math.abs(testPoint.y - rotationHandle.y) <= hitRadius;
-
+    const hit = hitTestRotationHandle(worldPoint, bounds, camera.zoom, angle);
     if (!hit) return false;
 
     const cx = bounds.x + bounds.width / 2;
@@ -88,10 +78,19 @@ export function useRotationMode() {
     startElementAngles.current = new Map();
   }
 
+  function updateHoverCursor(worldPoint: Point): boolean {
+    if (!bounds || isRotating.current) return false;
+
+    const hit = hitTestRotationHandle(worldPoint, bounds, camera.zoom, angle);
+    setCursor(hit ? "grab" : "default");
+    return hit;
+  }
+
   return {
     tryStartRotating,
     applyRotation,
     stopRotating,
+    updateHoverCursor,
     isRotating: () => isRotating.current,
   };
 }

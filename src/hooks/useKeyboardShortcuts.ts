@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { useCanvasStore } from "../store/useCanvasStore";
 
 export function useKeyboardShortcuts() {
-  const { deleteSelectedElements } = useCanvasStore();
+  const { elements, deleteSelectedElements, setSelectedElementIds, setTool } =
+    useCanvasStore();
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -16,11 +17,11 @@ export function useKeyboardShortcuts() {
         return;
       }
 
-      // if (event.ctrlKey && event.key.toLowerCase() === "a") {
-      //   event.preventDefault();
-      //   setSelectedElementIds(elements.map((el) => el.id));
-      //   setTool("selection");
-      // }
+      if (event.ctrlKey && event.key.toLowerCase() === "a") {
+        event.preventDefault();
+        setSelectedElementIds(elements.map((el) => el.id));
+        setTool("selection");
+      }
 
       if (event.key === "Delete") {
         event.preventDefault();
@@ -30,5 +31,5 @@ export function useKeyboardShortcuts() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [deleteSelectedElements]);
+  }, [elements, deleteSelectedElements, setSelectedElementIds, setTool]);
 }

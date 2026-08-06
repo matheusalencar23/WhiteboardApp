@@ -33,6 +33,10 @@ interface ElementBase {
   seed: number;
 }
 
+interface LinearElementBase extends ElementBase {
+  points: Point[];
+}
+
 export interface RectangleElement extends ElementBase {
   type: "rectangle";
   width: number;
@@ -49,9 +53,20 @@ export interface EllipseElement extends ElementBase {
   fillStyle: string;
 }
 
-export interface LineElement extends ElementBase {
+export interface LineElement extends LinearElementBase {
   type: "line";
-  points: Point[];
 }
 
-export type CanvasElement = RectangleElement | EllipseElement | LineElement;
+export type ArrowheadType = "none" | "triangle";
+
+export interface ArrowElement extends LinearElementBase {
+  type: "arrow";
+  startArrowhead: ArrowheadType;
+  endArrowhead: ArrowheadType;
+}
+
+export type CanvasElement =
+  | RectangleElement
+  | EllipseElement
+  | LineElement
+  | ArrowElement;

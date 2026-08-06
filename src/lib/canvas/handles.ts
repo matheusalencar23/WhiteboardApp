@@ -1,9 +1,20 @@
+import { toShapeSpace } from "../geometry/coordinates";
 import type { Bounds, HandleType, Point } from "../geometry/types";
 
 const HANDLE_PADDING = 8;
 const ROTATION_OFFSET = 24;
+const HIT_RADIUS = 8;
 
-export const RESIZE_HANDLE_TYPES: HandleType[] = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
+export const RESIZE_HANDLE_TYPES: HandleType[] = [
+  "nw",
+  "n",
+  "ne",
+  "e",
+  "se",
+  "s",
+  "sw",
+  "w",
+];
 
 /**
  * Posições (centro de cada handle) ao redor de uma caixa, em coordenadas
@@ -37,4 +48,45 @@ export function getHandlePositions(
     w: { x: x0, y: midY },
     rotation: { x: midX, y: y0 - ROTATION_OFFSET / zoom },
   };
+}
+
+export function hitTestRotationHandle(
+  worldPoint: Point,
+  bounds: Bounds,
+  zoom: number,
+  angle: number,
+): boolean {
+  if (!bounds) return false;
+
+  const testPoint = toShapeSpace(worldPoint, bounds, angle);
+  const hitRadius = HIT_RADIUS / zoom;
+  const rotationHandle = getHandlePositions(bounds, zoom).rotation;
+
+  return (
+    Math.abs(testPoint.x - rotationHandle.x) <= hitRadius &&
+    Math.abs(testPoint.y - rotationHandle.y) <= hitRadius
+  );
+}
+
+export function hitTestRezizeHandle(
+  worldPoint: Point,
+  bounds: Bounds,
+  zoom: number,
+  angle: number,
+): HandleType | undefined {
+  if (!bounds) return;
+
+  const testPoint = toShapeSpace(worldPoint, bounds, angle);
+  const hitRadius = HIT_RADIUS / zoom;
+  const positions = getHandlePositions(bounds, zoom);
+
+  const hit = RESIZE_HANDLE_TYPES.find((type) => {
+    const p = positions[type];
+    return (
+      Math.abs(testPoint.x - p.x) <= hitRadius &&
+      Math.abs(testPoint.y - p.y) <= hitRadius
+    );
+  });
+
+  return hit;
 }
