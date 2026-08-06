@@ -16,5 +16,5 @@ export function toShapeSpace(
   const cx = bounds.x + bounds.width / 2;
   const cy = bounds.y + bounds.height / 2;
   const center: Point = { x: cx, y: cy };
-  return rotatePoint(center, bounds, -angle);
+  return rotatePoint(point, center, -angle);
 }

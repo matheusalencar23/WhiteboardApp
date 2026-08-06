@@ -3,6 +3,7 @@ import { useCanvasStore } from "../store/useCanvasStore";
 import { useDrawMode } from "./useDrawMode";
 import { useMoveMode } from "./useMoveMode";
 import { useResizeMode } from "./useResizeMode";
+import { useRotationMode } from "./useRotationMode";
 import { useSelectioMode } from "./useSelectionMode";
 
 export function useCanvasEvents() {
@@ -11,6 +12,7 @@ export function useCanvasEvents() {
   const selectionMode = useSelectioMode();
   const moveMode = useMoveMode();
   const resizeMode = useResizeMode();
+  const rotationMode = useRotationMode();
 
   function worldPointFromPointerEvent(event: React.PointerEvent) {
     return screenToWorld(camera, {
@@ -23,6 +25,9 @@ export function useCanvasEvents() {
     const worldPoint = worldPointFromPointerEvent(event);
 
     if (activeTool === "selection") {
+      const startedRotating = rotationMode.tryStartRotating(worldPoint);
+      if (startedRotating) return;
+
       const startedResizing = resizeMode.tryStartResizing(worldPoint);
       if (startedResizing) return;
 
@@ -38,6 +43,11 @@ export function useCanvasEvents() {
 
   function handlePointerMove(event: React.PointerEvent) {
     const worldPoint = worldPointFromPointerEvent(event);
+
+    if (rotationMode.isRotating()) {
+      rotationMode.applyRotation(worldPoint);
+      return;
+    }
 
     if (resizeMode.isResizing()) {
       resizeMode.applyResize(worldPoint);
@@ -62,6 +72,7 @@ export function useCanvasEvents() {
     selectionMode.stopSelection();
     moveMode.stopMoving();
     resizeMode.stopResizing();
+    rotationMode.stopRotating();
   }
 
   return { handlePointerDown, handlePointerMove, handlePointerUp };

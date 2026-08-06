@@ -127,5 +127,22 @@ function drawSelectionBox(
     ctx.strokeRect(p.x - halfHandle, p.y - halfHandle, handleSize, handleSize);
   });
 
+  const rotationHandle = positions.rotation;
+  const topCenter = positions.n;
+
+  ctx.strokeStyle = "rgba(59, 130, 246, 0.8)";
+  ctx.lineWidth = 1.5 / zoom;
+  ctx.beginPath();
+  ctx.moveTo(topCenter.x, topCenter.y);
+  ctx.lineTo(rotationHandle.x, rotationHandle.y);
+  ctx.stroke();
+
+  const rotationRadius = 5 / zoom;
+  ctx.beginPath();
+  ctx.arc(rotationHandle.x, rotationHandle.y, rotationRadius, 0, Math.PI * 2);
+  ctx.fillStyle = "rgb(241, 246, 255)";
+  ctx.fill();
+  ctx.stroke();
+
   ctx.restore();
 }
