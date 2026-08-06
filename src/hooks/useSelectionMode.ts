@@ -6,10 +6,15 @@ import type { Point } from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
 
 export function useSelectioMode() {
-  const { elements, setSelectedElementIds, selectionBox, setSelectionBox } =
-    useCanvasStore();
+  const {
+    elements,
+    setSelectedElementIds,
+    addElementId,
+    selectionBox,
+    setSelectionBox,
+  } = useCanvasStore();
 
-  function startSelection(worldPoint: Point) {
+  function startSelection(worldPoint: Point, shiftKey = false) {
     let clickedId: string | null = null;
     for (let i = elements.length - 1; i >= 0; i--) {
       if (elementContainsPoint(elements[i], worldPoint)) {
@@ -19,6 +24,11 @@ export function useSelectioMode() {
     }
 
     if (clickedId) {
+      if (shiftKey) {
+        addElementId(clickedId);
+        return;
+      }
+      
       setSelectedElementIds([clickedId]);
       return;
     }

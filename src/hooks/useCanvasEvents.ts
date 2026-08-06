@@ -33,7 +33,7 @@ export function useCanvasEvents() {
 
       const startedMoving = moveMode.tryStartMoving(worldPoint);
       if (!startedMoving) {
-        selectionMode.startSelection(worldPoint);
+        selectionMode.startSelection(worldPoint, event.shiftKey);
       }
       return;
     }
