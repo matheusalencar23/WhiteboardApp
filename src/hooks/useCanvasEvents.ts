@@ -2,6 +2,7 @@ import { screenToWorld } from "../lib/canvas/camera";
 import { useCanvasStore } from "../store/useCanvasStore";
 import { useDrawMode } from "./useDrawMode";
 import { useMoveMode } from "./useMoveMode";
+import { useResizeMode } from "./useResizeMode";
 import { useSelectioMode } from "./useSelectionMode";
 
 export function useCanvasEvents() {
@@ -9,6 +10,7 @@ export function useCanvasEvents() {
   const drawMode = useDrawMode();
   const selectionMode = useSelectioMode();
   const moveMode = useMoveMode();
+  const resizeMode = useResizeMode();
 
   function worldPointFromPointerEvent(event: React.PointerEvent) {
     return screenToWorld(camera, {
@@ -21,6 +23,9 @@ export function useCanvasEvents() {
     const worldPoint = worldPointFromPointerEvent(event);
 
     if (activeTool === "selection") {
+      const startedResizing = resizeMode.tryStartResizing(worldPoint);
+      if (startedResizing) return;
+
       const startedMoving = moveMode.tryStartMoving(worldPoint);
       if (!startedMoving) {
         selectionMode.startSelection(worldPoint);
@@ -33,6 +38,11 @@ export function useCanvasEvents() {
 
   function handlePointerMove(event: React.PointerEvent) {
     const worldPoint = worldPointFromPointerEvent(event);
+
+    if (resizeMode.isResizing()) {
+      resizeMode.applyResize(worldPoint);
+      return;
+    }
 
     if (moveMode.isMoving()) {
       moveMode.applyMove(worldPoint);
@@ -51,6 +61,7 @@ export function useCanvasEvents() {
     drawMode.stopDrawing();
     selectionMode.stopSelection();
     moveMode.stopMoving();
+    resizeMode.stopResizing();
   }
 
   return { handlePointerDown, handlePointerMove, handlePointerUp };

@@ -107,3 +107,73 @@ export function moveElement(
 ): CanvasElement {
   return cloneElement(el, { x: el.x + deltaX, y: el.y + deltaY });
 }
+
+/**
+ * Aplica uma mudança de bounds a um elemento, de forma específica ao
+ * tipo: formas-caixa recebem width/height diretamente; formas lineares
+ * têm seus pontos escalados proporcionalmente, mantendo a forma.
+ */
+export function applyBoundsToElement(
+  el: CanvasElement,
+  oldBounds: Bounds,
+  newBounds: Bounds,
+): CanvasElement {
+  if (el.type === "line") {
+    const scaleX = newBounds.width / (oldBounds.width || 1);
+    const scaleY = newBounds.height / (oldBounds.height || 1);
+
+    const worldPoints = el.points.map((p) => ({
+      x: el.x + p.x,
+      y: el.y + p.y,
+    }));
+    const mapped = worldPoints.map((p) => ({
+      x: newBounds.x + (p.x - oldBounds.x) * scaleX,
+      y: newBounds.y + (p.y - oldBounds.y) * scaleY,
+    }));
+
+    const originX = mapped[0].x;
+    const originY = mapped[0].y;
+
+    return cloneElement(el, {
+      x: originX,
+      y: originY,
+      points: mapped.map((p) => ({ x: p.x - originX, y: p.y - originY })),
+    });
+  }
+
+  return cloneElement(el, {
+    x: newBounds.x,
+    y: newBounds.y,
+    width: newBounds.width,
+    height: newBounds.height,
+  });
+}
+
+/** Caixa que envolve um grupo de elementos, já rotacionados individualmente. */
+export function getGroupBounds(elements: CanvasElement[]) {
+  if (elements.length === 0) return null;
+
+  let minX = Infinity,
+    minY = Infinity,
+    maxX = -Infinity,
+    maxY = -Infinity;
+
+  elements.forEach((el) => {
+    const bounds = getElementBounds(el);
+    minX = Math.min(minX, bounds.x);
+    minY = Math.min(minY, bounds.y);
+    maxX = Math.max(maxX, bounds.x + bounds.width);
+    maxY = Math.max(maxY, bounds.y + bounds.height);
+  });
+
+  console.table({
+    minX,
+    minY,
+    maxX,
+    maxY,
+    width: maxX - minX,
+    height: maxY - minY,
+  });
+
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+}

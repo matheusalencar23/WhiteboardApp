@@ -1,5 +1,6 @@
 .toolbar {
   position: fixed;
+  z-index: 2;
   top: 50%;
   left: 10px;
   display: flex;

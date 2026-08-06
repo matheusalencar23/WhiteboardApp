@@ -25,7 +25,7 @@ interface NewElementInput {
 
 const DEFAULT_STYLE = {
   stroke: "#000000",
-  strokeWidth: 2,
+  strokeWidth: 1.5,
   roughness: 1.5,
   bowing: 1,
   fill: null as string | null,

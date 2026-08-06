@@ -1,29 +1,9 @@
 import {
-  getElementBounds,
   getElementGeometry,
+  getGroupBounds,
 } from "../lib/geometry/elementOperations";
 import type { CanvasElement } from "../lib/geometry/types";
 import { useCanvasStore } from "../store/useCanvasStore";
-
-/** Caixa que envolve um grupo de elementos, já rotacionados individualmente. */
-function getGroupBounds(elements: CanvasElement[]) {
-  if (elements.length === 0) return null;
-
-  let minX = Infinity,
-    minY = Infinity,
-    maxX = -Infinity,
-    maxY = -Infinity;
-
-  elements.forEach((el) => {
-    const bounds = getElementBounds(el);
-    minX = Math.min(minX, bounds.x);
-    minY = Math.min(minY, bounds.y);
-    maxX = Math.max(maxX, bounds.x + bounds.width);
-    maxY = Math.max(maxY, bounds.y + bounds.height);
-  });
-
-  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
-}
 
 export function useSelectedElements() {
   const { elements: allElements, selectedElementIds } = useCanvasStore();

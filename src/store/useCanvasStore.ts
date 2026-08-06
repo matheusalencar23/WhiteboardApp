@@ -27,15 +27,7 @@ interface CanvasStore {
 }
 
 export const useCanvasStore = create<CanvasStore>((set) => ({
-  elements: [
-    { id: "test-1", type: "rectangle", x: 200, y: 150, width: 160, height: 90, angle: 25,
-    stroke: "#1e293b", strokeWidth: 2, roughness: 1.5, bowing: 1, seed: 1, fill: null, fillStyle: "hachure" },
-  { id: "test-2", type: "ellipse", x: 420, y: 150, width: 140, height: 90, angle: 40,
-    stroke: "#1e293b", strokeWidth: 2, roughness: 1.5, bowing: 1, seed: 2, fill: null, fillStyle: "hachure" },
-  { id: "test-3", type: "line", x: 250, y: 320, angle: 15,
-    stroke: "#1e293b", strokeWidth: 2, roughness: 1.5, bowing: 1, seed: 3,
-    points: [{ x: 0, y: 0 }, { x: 180, y: -60 }] },
-  ],
+  elements: [],
   addElement: (el) => set((state) => ({ elements: [...state.elements, el] })),
   updateElement: (id, newEl) =>
     set((state) => ({
