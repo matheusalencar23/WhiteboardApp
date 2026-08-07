@@ -25,16 +25,18 @@ export function useCanvasEvents() {
     const worldPoint = worldPointFromPointerEvent(event);
 
     if (activeTool === "selection") {
-      const startedRotating = rotationMode.tryStartRotating(worldPoint);
-      if (startedRotating) return;
+      if (!event.shiftKey) {
+        const startedRotating = rotationMode.tryStartRotating(worldPoint);
+        if (startedRotating) return;
 
-      const startedResizing = resizeMode.tryStartResizing(worldPoint);
-      if (startedResizing) return;
+        const startedResizing = resizeMode.tryStartResizing(worldPoint);
+        if (startedResizing) return;
 
-      const startedMoving = moveMode.tryStartMoving(worldPoint);
-      if (!startedMoving) {
-        selectionMode.startSelection(worldPoint, event.shiftKey);
+        const startedMoving = moveMode.tryStartMoving(worldPoint);
+        if (startedMoving) return;
       }
+
+      selectionMode.startSelection(worldPoint, event.shiftKey);
       return;
     }
 
@@ -44,8 +46,15 @@ export function useCanvasEvents() {
   function handlePointerMove(event: React.PointerEvent) {
     const worldPoint = worldPointFromPointerEvent(event);
 
-    if (!resizeMode.updateHoverCursor(worldPoint)) {
-      rotationMode.updateHoverCursor(worldPoint);
+    const anyGestureActive =
+      resizeMode.isResizing() ||
+      rotationMode.isRotating() ||
+      moveMode.isMoving();
+
+    if (!anyGestureActive) {
+      if (!resizeMode.updateHoverCursor(worldPoint)) {
+        rotationMode.updateHoverCursor(worldPoint);
+      }
     }
 
     if (rotationMode.isRotating()) {

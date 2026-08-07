@@ -9,7 +9,7 @@ export function useSelectioMode() {
   const {
     elements,
     setSelectedElementIds,
-    addElementId,
+    toggleElementId,
     selectionBox,
     setSelectionBox,
   } = useCanvasStore();
@@ -25,7 +25,7 @@ export function useSelectioMode() {
 
     if (clickedId) {
       if (shiftKey) {
-        addElementId(clickedId);
+        toggleElementId(clickedId);
         return;
       }
       

@@ -38,6 +38,7 @@ export function useRotationMode() {
       selected.map((el) => [el.id, el.angle || 0]),
     );
 
+    setCursor("grabbing");
     return true;
   }
 
