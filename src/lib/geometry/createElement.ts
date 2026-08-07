@@ -120,3 +120,10 @@ export function cloneElement<T extends CanvasElement>(
 ): T {
   return { ...el, ...overrides };
 }
+
+export function duplicateElement(
+  el: CanvasElement,
+  offset: Point = { x: 20, y: 20 },
+): CanvasElement {
+  return { ...el, id: nanoid(), x: el.x + offset.x, y: el.y + offset.y };
+}
