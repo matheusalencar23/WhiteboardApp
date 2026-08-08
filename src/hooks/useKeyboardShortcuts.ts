@@ -16,6 +16,9 @@ export function useKeyboardShortcuts() {
     deleteSelectedElements,
     setSelectedElementIds,
     setTool,
+    commitHistory,
+    undo,
+    redo,
   } = useCanvasStore();
 
   function isTextEditor(element: HTMLElement) {
@@ -34,15 +37,28 @@ export function useKeyboardShortcuts() {
 
       const isModifier = event.ctrlKey || event.metaKey; // metaKey cobre Cmd no macOS
 
+      if (isModifier && event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        if (event.shiftKey) redo();
+        else undo();
+        return;
+      }
+
       if (event.key === "Delete") {
         event.preventDefault();
+        if (selectedElementIds.length === 0) return;
+
+        const before = elements;
         deleteSelectedElements();
+        commitHistory(before);
+        return;
       }
 
       if (isModifier && event.key.toLowerCase() === "a") {
         event.preventDefault();
         setSelectedElementIds(elements.map((el) => el.id));
         setTool("selection");
+        return;
       }
 
       if (isModifier && event.key.toLowerCase() === "c") {
@@ -69,8 +85,11 @@ export function useKeyboardShortcuts() {
         const pasted = clipboard.current.map((el) =>
           duplicateElement(el, offset),
         );
+
+        const before = elements;
         addElements(pasted);
         setSelectedElementIds(pasted.map((el) => el.id));
+        commitHistory(before);
         return;
       }
     }
@@ -84,5 +103,8 @@ export function useKeyboardShortcuts() {
     deleteSelectedElements,
     setSelectedElementIds,
     setTool,
+    commitHistory,
+    undo,
+    redo,
   ]);
 }

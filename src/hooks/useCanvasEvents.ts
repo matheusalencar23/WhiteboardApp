@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { screenToWorld } from "../lib/canvas/camera";
 import { useCanvasStore } from "../store/useCanvasStore";
 import { useDrawMode } from "./useDrawMode";
@@ -5,9 +6,11 @@ import { useMoveMode } from "./useMoveMode";
 import { useResizeMode } from "./useResizeMode";
 import { useRotationMode } from "./useRotationMode";
 import { useSelectioMode } from "./useSelectionMode";
+import { type CanvasElement } from "../lib/geometry/types";
 
 export function useCanvasEvents() {
   const { camera, activeTool } = useCanvasStore();
+  const beforeElements = useRef<CanvasElement[]>([]);
   const drawMode = useDrawMode();
   const selectionMode = useSelectioMode();
   const moveMode = useMoveMode();
@@ -22,6 +25,8 @@ export function useCanvasEvents() {
   }
 
   function handlePointerDown(event: React.PointerEvent) {
+    beforeElements.current = useCanvasStore.getState().elements;
+
     const worldPoint = worldPointFromPointerEvent(event);
 
     if (activeTool === "selection") {
@@ -86,6 +91,8 @@ export function useCanvasEvents() {
     moveMode.stopMoving();
     resizeMode.stopResizing();
     rotationMode.stopRotating();
+
+    useCanvasStore.getState().commitHistory(beforeElements.current);
   }
 
   return { handlePointerDown, handlePointerMove, handlePointerUp };

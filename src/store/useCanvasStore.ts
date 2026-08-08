@@ -3,6 +3,8 @@ import { IDENTITY_CAMERA, type Camera } from "../lib/canvas/camera";
 import type { CanvasElement, Point } from "../lib/geometry/types";
 import type { Tool } from "../lib/canvas/types";
 
+const MAX_HISTORY = 100;
+
 interface CanvasStore {
   elements: CanvasElement[];
   addElement: (el: CanvasElement) => void;
@@ -26,6 +28,11 @@ interface CanvasStore {
 
   activeTool: Tool;
   setTool: (tool: Tool) => void;
+
+  history: { past: CanvasElement[][]; future: CanvasElement[][] };
+  commitHistory: (previousElement: CanvasElement[]) => void;
+  undo: () => void;
+  redo: () => void;
 }
 
 export const useCanvasStore = create<CanvasStore>((set) => ({
@@ -72,4 +79,54 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
 
   activeTool: "selection",
   setTool: (tool) => set(() => ({ activeTool: tool })),
+
+  history: { past: [], future: [] },
+  commitHistory: (previousElements) =>
+    set((state) => {
+      if (previousElements === state.elements) return {};
+      return {
+        history: {
+          past: [...state.history.past, previousElements].slice(-MAX_HISTORY),
+          future: [],
+        },
+      };
+    }),
+
+  undo: () =>
+    set((state) => {
+      if (state.history.past.length === 0) return {};
+
+      const previous = state.history.past[state.history.past.length - 1];
+      const newPast = state.history.past.slice(0, -1);
+
+      return {
+        elements: previous,
+        selectedElementIds: state.selectedElementIds.filter((id) =>
+          previous.some((el) => el.id === id),
+        ),
+        history: {
+          past: newPast,
+          future: [state.elements, ...state.history.future],
+        },
+      };
+    }),
+
+  redo: () =>
+    set((state) => {
+      if (state.history.future.length === 0) return {};
+
+      const next = state.history.future[0];
+      const newFuture = state.history.future.slice(1);
+
+      return {
+        elements: next,
+        selectedElementIds: state.selectedElementIds.filter((id) =>
+          next.some((el) => el.id === id),
+        ),
+        history: {
+          past: [...state.history.past, state.elements],
+          future: newFuture,
+        },
+      };
+    }),
 }));
