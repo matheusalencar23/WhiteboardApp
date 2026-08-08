@@ -11,6 +11,7 @@ interface CanvasStore {
   updateElement: (id: string, el: CanvasElement) => void;
   deleteElement: (id: string) => void;
   addElements: (els: CanvasElement[]) => void;
+  setElements: (elements: CanvasElement[]) => void;
 
   camera: Camera;
   setCamera: (camera: Camera | ((prev: Camera) => Camera)) => void;
@@ -44,9 +45,14 @@ export const useCanvasStore = create<CanvasStore>((set) => ({
     })),
   deleteElement: (id) =>
     set((state) => ({ elements: state.elements.filter((el) => el.id !== id) })),
-
   addElements: (els) =>
     set((state) => ({ elements: [...state.elements, ...els] })),
+  setElements: (elements) =>
+    set({
+      elements,
+      selectedElementIds: [],
+      history: { past: [], future: [] },
+    }),
 
   camera: IDENTITY_CAMERA,
   setCamera: (camera) =>

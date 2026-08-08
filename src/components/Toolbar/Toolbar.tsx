@@ -6,6 +6,7 @@ import "./style.css";
 import type { IconType } from "react-icons";
 import { IoEllipseOutline } from "react-icons/io5";
 import { TbArrowLeftCircle, TbLine } from "react-icons/tb";
+// import { exportToJsonFile, importFromJsonFile } from "../../lib/persistence/fileTransfer";
 
 const tools: { name: Tool; icon: IconType; style?: React.CSSProperties }[] = [
   {
@@ -28,8 +29,8 @@ const tools: { name: Tool; icon: IconType; style?: React.CSSProperties }[] = [
     name: "arrow",
     icon: TbArrowLeftCircle,
     style: {
-      transform: "rotate(135deg)"
-    }
+      transform: "rotate(135deg)",
+    },
   },
 ];
 
@@ -40,6 +41,18 @@ export function Toolbar() {
     setSelectedElementIds([]);
     setTool(tool);
   }
+
+  // async function handleImport(event: React.ChangeEvent<HTMLInputElement>) {
+  //   const file = event.target.files?.[0];
+  //   if (!file) return;
+
+  //   try {
+  //     const elements = await importFromJsonFile(file);
+  //     useCanvasStore.getState().setElements(elements);
+  //   } catch {
+  //     alert("Não foi possível importar este arquivo.");
+  //   }
+  // }
 
   return (
     <div className="toolbar">
@@ -53,6 +66,9 @@ export function Toolbar() {
           {<tool.icon size={16} style={tool.style} />}
         </button>
       ))}
+
+      {/* <button onClick={() => exportToJsonFile(elements)}>exportar</button> */}
+      {/* <input type="file" accept="application/json" onChange={handleImport} /> */}
     </div>
   );
 }

@@ -1,9 +1,21 @@
+import { useEffect } from "react";
 import "./App.css";
 import { Canvas } from "./components/Canvas/Canvas";
 // import { StylePanel } from "./components/StylePanel/StylePanel";
 import { Toolbar } from "./components/Toolbar/Toolbar";
+import { useAutosave } from "./hooks/useAutosave";
+import { useCanvasStore } from "./store/useCanvasStore";
+import { loadFromLocalStorage } from "./lib/persistence/storage";
 
 function App() {
+  const { setElements } = useCanvasStore();
+  useAutosave();
+
+  useEffect(() => {
+    const saved = loadFromLocalStorage();
+    if (saved) setElements(saved);
+  }, [setElements]);
+
   return (
     <>
       <Toolbar />
